@@ -197,3 +197,9 @@ body { margin: 0; background: #0000f2; overflow-x: clip; }
 /* ---- run explorer ---- */
 .explorer-page { padding: clamp(20px, 3vw, 48px); max-width: 78rem; }
 .explorer-page .hw-mono { text-transform: none; }
+
+/* The portal shell clips its content to one viewport height. Let it grow with the content so the page scrolls. */
+.hermes-portal-shell__stage { height: auto !important; overflow: visible !important; }
+.hermes-portal-shell__content { overflow: visible !important; }
+.hermes-portal-shell__viewport { height: auto !important; min-height: 100dvh; }
+@media (max-width: 768px) { .hermes-portal-sidebar__figure { display: none; } }

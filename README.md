@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://amethystani.github.io/evirag-bench/">Demo</a> ·
+  <a href="https://amethystani.github.io/evirag-bench/">Site</a> ·
   <a href="https://amethystani.github.io/evirag-bench/explorer/">Run explorer</a> ·
   <a href="paper/paper.pdf">Paper</a> ·
   <a href="CITATION.cff">Cite</a> ·

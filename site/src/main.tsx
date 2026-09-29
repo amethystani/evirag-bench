@@ -235,8 +235,7 @@ function App() {
             },
             { type: 'link', label: 'Learn', href: '#problem' },
             { type: 'link', label: 'Runs', href: '#runs' },
-            { type: 'link', label: 'Explorer', href: 'explorer/' },
-            { type: 'link', label: 'Demo', href: 'demo/' }
+            { type: 'link', label: 'Explorer', href: 'explorer/' }
           ],
           afterLogo: [
             { type: 'link', label: 'Docs', href: `${REPO}/tree/main/docs` },
