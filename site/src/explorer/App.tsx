@@ -1,7 +1,10 @@
 import { Badge, BottomSheet, Button, ConfirmDialog, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Input, ListItem, Segmented, Switch, useBelowBreakpoint } from '@nous-research/ui'
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { chunks, claims, contradictions, meta, REPO, views } from './data'
 import { Chat, makeMessage, newConversation, type Conversation } from './Chat'
+import { DevicePanel } from './ondevice/DevicePanel'
+import { useOnDevice, type OnDevice } from './ondevice/useOnDevice'
+import { Cancelled, DOWNLOAD_MB } from './ondevice/config'
 import { Claims, docsIndex, Docs, Graph, Metrics, Overview, PageTitle, Passages, Time, Views } from './pages'
 
 type Theme = 'signal' | 'ink' | 'sand'
@@ -43,9 +46,9 @@ function usePref<T extends string | boolean>(key: string, initial: T) {
 
 const SAVED_RUN = FLAT.filter((n) => !['/chat', '/settings'].includes(n.path))
 
-function Settings({ theme, setTheme, dense, setDense, reduce, setReduce, clearChats, go }: {
+function Settings({ theme, setTheme, dense, setDense, reduce, setReduce, clearChats, go, device }: {
   theme: Theme; setTheme: (t: Theme) => void; dense: boolean; setDense: (b: boolean) => void; reduce: boolean; setReduce: (b: boolean) => void
-  clearChats: () => void; go: (p: string) => void
+  clearChats: () => void; go: (p: string) => void; device: OnDevice
 }) {
   const [confirm, setConfirm] = useState(false)
   return (
@@ -58,6 +61,13 @@ function Settings({ theme, setTheme, dense, setDense, reduce, setReduce, clearCh
           <label className="ex-switch"><Switch checked={dense} onCheckedChange={setDense} aria-label="Compact layout" /> Compact layout</label>
           <label className="ex-switch"><Switch checked={reduce} onCheckedChange={setReduce} aria-label="Reduce motion" /> Reduce motion</label>
         </section>
+        {device.phase !== 'off' && <section className="ex-card">
+          <p className="ex-label">On-device model</p>
+          <p className="ex-mono">{device.phase === 'unsupported' ? `Not available: ${device.gpu?.reason ?? 'WebGPU is missing.'}` : device.phase === 'ready' ? 'Loaded. Answers are produced on this device.' : device.phase === 'downloading' ? `Loading: ${Math.round(device.progress * 100)}%` : device.cached ? 'Downloaded and cached by your browser.' : `Not downloaded (about ${DOWNLOAD_MB} MB, once).`}</p>
+          <div>{device.cached || device.phase === 'ready'
+            ? <Button hierarchy="outline" onClick={() => void device.remove()}>Remove downloaded model</Button>
+            : device.phase === 'idle' || device.phase === 'error' ? <Button hierarchy="outline" onClick={device.enable}>Download and turn on</Button> : null}</div>
+        </section>}
         <section className="ex-card">
           <p className="ex-label">Saved run</p>
           <p className="ex-mono">Browse the smoke run that the example answers come from.</p>
@@ -139,6 +149,9 @@ export function App() {
     return [newConversation()]
   })
   const [activeId, setActiveId] = useState<string>(() => chats[0].id)
+  const device = useOnDevice()
+  const [working, setWorking] = useState<string | null>(null)
+  const abort = useRef<AbortController | null>(null)
   useEffect(() => { try { localStorage.setItem('ex-chats', JSON.stringify(chats.slice(0, 30))) } catch { /* storage unavailable */ } }, [chats])
   const active = chats.find((c) => c.id === activeId) ?? chats[0]
   const startChat = () => {
@@ -153,14 +166,30 @@ export function App() {
     if (id === activeId) setActiveId(next[0].id)
   }
   const sendMessage = (text: string) => {
+    const chatId = active.id
     const u = makeMessage('user', text)
-    setChats((all) => all.map((c) => c.id === active.id ? { ...c, title: c.messages.length === 0 ? text.slice(0, 48) : c.title, messages: [...c.messages, u] } : c))
+    setChats((all) => all.map((c) => c.id === chatId ? { ...c, title: c.messages.length === 0 ? text.slice(0, 48) : c.title, messages: [...c.messages, u] } : c))
+    const reply = (m: ReturnType<typeof makeMessage>) => setChats((all) => all.map((c) => c.id === chatId ? { ...c, messages: [...c.messages, m] } : c))
+
+    if (device.phase === 'ready') {
+      const ctl = new AbortController()
+      abort.current = ctl
+      setWorking('Starting')
+      device.answer(text, setWorking, ctl.signal)
+        .then((res) => {
+          if ('notCovered' in res) reply(makeMessage('assistant', 'I found no relevant sources for that in the bundled abstracts. Right now I can answer questions about education, biomedicine, economics, earth sciences and nutrition, for example “Does homework improve academic achievement?”'))
+          else reply(makeMessage('assistant', '', 'answer', res))
+        })
+        .catch((e) => { if (!(e instanceof Cancelled)) reply(makeMessage('assistant', `That did not work: ${e instanceof Error ? e.message : String(e)}`)) })
+        .finally(() => { setWorking(null); abort.current = null })
+      return
+    }
+
     setTimeout(() => {
       const matched = /homework/i.test(text)
-      const a = matched
+      reply(matched
         ? makeMessage('assistant', '', 'answer')
-        : makeMessage('assistant', 'Live answers are not available yet, so I cannot answer that question. This chat will go live later. I can show you a worked example of what an answer looks like.', 'notyet')
-      setChats((all) => all.map((c) => c.id === active.id ? { ...c, messages: [...c.messages, a] } : c))
+        : makeMessage('assistant', 'Live answers are not available yet, so I cannot answer that question. This chat will go live later. I can show you a worked example of what an answer looks like.', 'notyet'))
     }, 900)
   }
 
@@ -187,7 +216,7 @@ export function App() {
       case '/time': return <Time />
       case '/metrics': return <Metrics />
       case '/docs': return <Docs />
-      case '/settings': return <Settings theme={theme} setTheme={setTheme} dense={dense} setDense={setDense} reduce={reduce} setReduce={setReduce} clearChats={() => { const c = newConversation(); setChats([c]); setActiveId(c.id) }} go={go} />
+      case '/settings': return <Settings theme={theme} setTheme={setTheme} dense={dense} setDense={setDense} reduce={reduce} setReduce={setReduce} clearChats={() => { const c = newConversation(); setChats([c]); setActiveId(c.id) }} go={go} device={device} />
       case '/overview': return <Overview go={go} />
       default: return null
     }
@@ -245,7 +274,7 @@ export function App() {
           )}
         </header>
         {isChat ? (
-          <main className="ex-chatmain" key={active.id}><Chat conv={active} onSend={sendMessage} onExample={() => setChats((all) => all.map((c) => c.id === active.id ? { ...c, messages: [...c.messages, makeMessage('assistant', 'Worked example: “Does homework improve academic achievement?”', 'answer')] } : c))} /></main>
+          <main className="ex-chatmain" key={active.id}><Chat conv={active} onSend={sendMessage} working={working} onCancel={() => abort.current?.abort()} deviceReady={device.phase === 'ready'} devicePanel={<DevicePanel device={device} />} onExample={() => setChats((all) => all.map((c) => c.id === active.id ? { ...c, messages: [...c.messages, makeMessage('assistant', 'Worked example: “Does homework improve academic achievement?”', 'answer')] } : c))} /></main>
         ) : (
           <main className="ex-content" key={current.path}><div className="ex-page surface-white" data-surface="white">{page}</div></main>
         )}

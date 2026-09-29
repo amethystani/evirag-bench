@@ -273,3 +273,15 @@ kbd { font: 500 11px 'Courier Prime', monospace; opacity: .7; border: 1px solid 
 .ab-headrow .ab-kicker { margin: 0; }
 .ab-copy { padding: 5px 12px; border: 1px solid var(--ex-line); border-radius: 999px; background: transparent; color: inherit; font: 500 12px var(--font-body); cursor: pointer; }
 .ab-copy:hover { background: rgb(255 255 255 / .14); }
+
+/* ---- on-device panel ---- */
+.dev-card { width: 100%; text-align: left; border: 1px solid var(--ex-accent); border-radius: 14px; padding: 16px 18px; background: rgb(237 255 69 / .08); display: grid; gap: 10px; margin-top: 8px; }
+.dev-title { margin: 0; font: 500 16px var(--font-body); }
+.dev-body { margin: 0; font: 400 12.5px/1.6 'Courier Prime', monospace; opacity: .85; }
+.dev-note { opacity: .6; }
+.dev-btn { justify-self: start; padding: 10px 18px; border-radius: 999px; border: 0; background: var(--ex-accent); color: var(--ex-chrome); font: 700 14px var(--font-body); cursor: pointer; transition: transform .2s; }
+.dev-btn:hover { transform: translateY(-1px); }
+.dev-ready { margin: 6px 0 0 !important; display: inline-flex; align-items: center; gap: 8px; font: 500 12px 'Courier Prime', monospace !important; opacity: 1 !important; }
+.dev-ready i { width: 8px; height: 8px; border-radius: 50%; background: #7ee2a0; box-shadow: 0 0 8px #7ee2a0; }
+.chat-cancel { margin-left: 12px; padding: 3px 12px; border-radius: 999px; border: 1px solid var(--ex-line); background: transparent; color: inherit; font: 500 12px var(--font-body); cursor: pointer; }
+.chat-cancel:hover { background: rgb(255 255 255 / .12); }

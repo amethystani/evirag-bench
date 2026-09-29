@@ -1,9 +1,26 @@
 import run from '../smoke_full.json'
+import compareData from '../answer_compare.json'
 
 export type View = { position: string; summary: string; weaknesses: string; sources: string[]; disagreement_causes: string[]; confidence_tier: string }
 export type Claim = { id: string; text: string; doc_id: string; chunk_id: string; year: number }
 export type Edge = { source: string; target: string; label: string; cda7: string | null }
-export type Chunk = { id: string; title: string; year: number; section: string; text: string }
+export type Chunk = { id: string; title: string; year: number; section: string; text: string; authors?: string; doi?: string | null; license?: string; domain?: string }
+
+export type RunData = {
+  id: string
+  question: string
+  model: string
+  source: 'saved' | 'device'
+  views: View[]
+  claims: Claim[]
+  edges: Edge[]
+  chunks: Chunk[]
+  curve: [string, [number, number]][]
+  vanilla: string
+  structured?: string
+  cr?: { full: number; vanilla: number; structured: number }
+  seconds?: number
+}
 
 export const REPO = 'https://github.com/amethystani/evirag-bench'
 export const meta = { id: run.id, question: run.question, model: run.model, cls: run.controversy_class }
@@ -34,3 +51,18 @@ export const STAGES = [
   ['Views', 'Signed Louvain partition.', `${views.length} views`],
   ['Confidence', 'Tier per view.', views.map((v) => v.confidence_tier).join(', ')]
 ] as const
+
+export const savedRun: RunData = {
+  id: run.id,
+  question: run.question,
+  model: run.model,
+  source: 'saved',
+  views,
+  claims,
+  edges,
+  chunks,
+  curve,
+  vanilla: compareData.vanilla,
+  structured: compareData.structured,
+  cr: compareData.cr as { full: number; vanilla: number; structured: number }
+}

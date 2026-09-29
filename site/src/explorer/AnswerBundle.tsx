@@ -1,62 +1,63 @@
 import { Badge, BadgeGroup, Progress, Segmented } from '@nous-research/ui'
 import { BarChart } from '@nous-research/ui/ui/components/graphs/index'
 import { useState } from 'react'
-import compare from '../answer_compare.json'
-import { chunks, claims, contradictions, curve, meta, views } from './data'
-import { CAUSE_PLAIN, claimOf, dominantCause, looksLikeCaveat, runChecks, tensions, trustLine, unsupportedWords } from './checks'
+import type { RunData } from './data'
+import { CAUSE_PLAIN, claimOf, contradictionsOf, dominantCause, looksLikeCaveat, runChecks, tensions, trustLine, unsupportedWords } from './checks'
 import { ClaimGraph } from './ClaimGraph'
 
 type Tab = 'positions' | 'graph' | 'conflicts' | 'diff' | 'sources' | 'time'
-const yearOf = (source: string) => chunks.find((c) => c.id === source)?.year
 const docOf = (source: string) => source.split(':')[0]
 const tierPct = (t: string) => (t === 'high' ? 90 : t === 'medium' ? 55 : 25)
 const TIER_WORDS: Record<string, string> = { high: 'Well supported', medium: 'Partly supported', low: 'Thinly supported' }
+const cite = (run: RunData, source: string) => {
+  const c = run.chunks.find((x) => x.id === source)
+  return c ? `${c.authors ? c.authors + ', ' : ''}${c.year}` : docOf(source)
+}
 
-function answerText() {
-  const lines = [`Q: ${meta.question}`, '', views.length > 1 ? `The sources disagree. ${views.length} positions:` : 'One position:']
-  views.forEach((v, i) => lines.push(`${i + 1}. ${v.position} (${[...new Set(v.sources.map(docOf))].join(', ')})`))
-  const cause = dominantCause()
+function answerText(run: RunData) {
+  const lines = [`Q: ${run.question}`, '', run.views.length > 1 ? `The sources disagree. ${run.views.length} positions:` : 'One position:']
+  run.views.forEach((v, i) => lines.push(`${i + 1}. ${v.position} (${[...new Set(v.sources.map((s) => cite(run, s)))].join('; ')})`))
+  const cause = dominantCause(run)
   if (cause) lines.push('', `Most likely reason they differ: ${CAUSE_PLAIN[cause] ?? cause} (automatic label).`)
-  lines.push('', trustLine(), '', ...runChecks().map((c) => `${c.ok ? '[ok]' : '[check]'} ${c.label}`))
+  lines.push('', trustLine(run), '', ...runChecks(run).map((c) => `${c.ok ? '[ok]' : '[check]'} ${c.label}`))
   return lines.join('\n')
 }
 
-function BottomLine() {
-  const cause = dominantCause()
-  const t = tensions()
+function BottomLine({ run }: { run: RunData }) {
+  const cause = dominantCause(run)
+  const t = tensions(run)
   const [copied, setCopied] = useState(false)
-  const copy = () => { navigator.clipboard?.writeText(answerText()).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1800) }, () => {}) }
+  const copy = () => { navigator.clipboard?.writeText(answerText(run)).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1800) }, () => {}) }
   return (
     <section className="ab-bottom" aria-label="Bottom line">
       <div className="ab-headrow"><p className="ab-kicker">Bottom line</p><button className="ab-copy" onClick={copy}>{copied ? 'Copied' : 'Copy answer'}</button></div>
       <p className="ab-lead">
-        {views.length > 1
-          ? `The sources do not agree, so this answer keeps ${views.length} positions apart instead of blending them into one.`
-          : 'The sources broadly agree on one position.'}
+        {run.views.length > 1
+          ? `The sources do not agree, so this answer keeps ${run.views.length} positions apart instead of blending them into one.`
+          : run.views.length === 1 ? 'The retrieved sources broadly agree on one position.' : 'No position could be formed from the retrieved sources.'}
       </p>
       <ol className="ab-positions">
-        {views.map((v) => (
+        {run.views.map((v) => (
           <li key={v.position}>
             <span>{v.position}</span>
-            <em>{[...new Set(v.sources.map(docOf))].map((d) => `${d}${yearOf(v.sources.find((s) => docOf(s) === d)!) ? `, ${yearOf(v.sources.find((s) => docOf(s) === d)!)}` : ''}`).join(' · ')}</em>
+            <em>{[...new Set(v.sources.map((s) => cite(run, s)))].join(' · ')}</em>
           </li>
         ))}
       </ol>
       {cause && t.length > 0 && (
         <p className="ab-why"><b>Why they differ.</b> Most likely because {CAUSE_PLAIN[cause] ?? cause}. This label is produced automatically; check it against the passages.</p>
       )}
-      <p className="ab-trust">{trustLine()}</p>
+      <p className="ab-trust">{trustLine(run)}</p>
     </section>
   )
 }
 
-function Checks() {
-  const checks = runChecks()
+function Checks({ run }: { run: RunData }) {
   return (
     <section className="ab-checks" aria-label="Automatic checks">
       <p className="ab-kicker">Automatic checks</p>
       <ul>
-        {checks.map((c) => (
+        {runChecks(run).map((c) => (
           <li key={c.label} className={c.ok ? 'ab-ok' : 'ab-warn'}>
             <span aria-hidden>{c.ok ? '✓' : '!'}</span>
             <span>{c.label}</span>
@@ -67,11 +68,11 @@ function Checks() {
   )
 }
 
-function PositionsTab() {
+function PositionsTab({ run }: { run: RunData }) {
   return (
     <div className="ab-stack">
-      {views.map((v, i) => {
-        const extra = unsupportedWords(v)
+      {run.views.map((v, i) => {
+        const extra = unsupportedWords(run, v)
         return (
           <article key={v.position} className="ab-card">
             <div className="ab-card-head">
@@ -91,8 +92,9 @@ function PositionsTab() {
   )
 }
 
-function ConflictsTab() {
-  const groups = tensions()
+function ConflictsTab({ run }: { run: RunData }) {
+  const groups = tensions(run)
+  if (!groups.length) return <p className="ab-p ab-dim">No contradicting claims were found among the retrieved passages.</p>
   return (
     <div className="ab-stack">
       <p className="ab-p ab-dim">Claim-level links are grouped by the two sources they come from, so one disagreement is not counted many times.</p>
@@ -106,8 +108,8 @@ function ConflictsTab() {
             </BadgeGroup>
           </div>
           {g.pairs.map((e, i) => {
-            const a = claimOf(e.source), b = claimOf(e.target)
-            const caveat = looksLikeCaveat(e)
+            const a = claimOf(run, e.source), b = claimOf(run, e.target)
+            const caveat = looksLikeCaveat(run, e)
             return (
               <div key={i} className={`ab-pair ${caveat ? 'ab-pair-dim' : ''}`}>
                 <p><span className="ab-id">{a.doc_id}</span> {a.text}</p>
@@ -123,38 +125,41 @@ function ConflictsTab() {
   )
 }
 
-function DiffTab() {
-  const cr = compare.cr as { full: number; vanilla: number; structured: number }
+function DiffTab({ run }: { run: RunData }) {
   return (
     <div className="ab-stack">
       <div className="ab-diff">
         <section className="ab-card">
           <p className="ab-no">Vanilla RAG: one answer</p>
-          <p className="ab-p">{compare.vanilla}</p>
-          <p className="ab-p ab-dim">Picks one side. The other position does not appear. Contradiction recall {cr.vanilla.toFixed(1)}.</p>
+          <p className="ab-p">{run.vanilla || 'No single-answer baseline was produced for this run.'}</p>
+          <p className="ab-p ab-dim">Picks one reading of the sources.{run.cr ? ` Contradiction recall ${run.cr.vanilla.toFixed(1)}.` : ''}</p>
         </section>
         <section className="ab-card ab-card-hot">
-          <p className="ab-no">EVIRAG: {views.length} positions</p>
-          <ol className="ab-mini">{views.map((v) => <li key={v.position}>{v.position}</li>)}</ol>
-          <p className="ab-p ab-dim">Keeps the disagreement and says where it comes from. Contradiction recall {cr.full.toFixed(1)}.</p>
+          <p className="ab-no">EVIRAG: {run.views.length} position{run.views.length === 1 ? '' : 's'}</p>
+          <ol className="ab-mini">{run.views.map((v) => <li key={v.position}>{v.position}</li>)}</ol>
+          <p className="ab-p ab-dim">Keeps the disagreement and says where it comes from.{run.cr ? ` Contradiction recall ${run.cr.full.toFixed(1)}.` : ''}</p>
         </section>
       </div>
-      <section className="ab-card">
-        <p className="ab-no">One structured prompt, no graph</p>
-        <p className="ab-p">{compare.structured}</p>
-        <p className="ab-p ab-dim">Contradiction recall {cr.structured.toFixed(1)}. On this single query a good prompt also names both sides, so this run does not show the graph beating it. That comparison is made on the full benchmark in the paper.</p>
-      </section>
-      <p className="ab-p ab-dim">Model: {compare.model}. One query on a two-passage demo corpus: it shows the mechanism, not benchmark quality.</p>
+      {run.structured && (
+        <section className="ab-card">
+          <p className="ab-no">One structured prompt, no graph</p>
+          <p className="ab-p">{run.structured}</p>
+          <p className="ab-p ab-dim">On this single query a good prompt can also name both sides, so one run does not show the graph beating it. That comparison is made on the full benchmark in the paper.</p>
+        </section>
+      )}
+      <p className="ab-p ab-dim">Model: {run.model}. {run.source === 'saved' ? 'One query on a two-passage demo corpus: it shows the mechanism, not benchmark quality.' : 'Produced on this device by a very small model, so treat the labels as candidates.'}</p>
     </div>
   )
 }
 
-function SourcesTab() {
+function SourcesTab({ run }: { run: RunData }) {
   return (
     <div className="ab-stack">
-      {chunks.map((c) => (
+      {run.chunks.map((c) => (
         <article key={c.id} className="ab-card">
-          <div className="ab-card-head"><span className="ab-no">{c.id}</span><span className="ab-id">{c.title} · {c.year}</span></div>
+          <div className="ab-card-head"><span className="ab-no">{c.id}</span><span className="ab-id">{c.year}{c.license ? ` · ${c.license.toUpperCase()}` : ''}</span></div>
+          <h4>{c.title}</h4>
+          {c.authors && <p className="ab-id">{c.authors}{c.doi ? <> · <a href={c.doi} target="_blank" rel="noopener noreferrer">{c.doi.replace('https://doi.org/', 'doi:')}</a></> : null}</p>}
           <p className="ab-p">{c.text}</p>
         </article>
       ))}
@@ -162,31 +167,32 @@ function SourcesTab() {
   )
 }
 
-function TimeTab() {
+function TimeTab({ run }: { run: RunData }) {
+  const top = Math.max(2, ...run.curve.flatMap(([, v]) => v)) + 1
   return (
     <div className="ab-grid2">
       <div>
         <p className="ab-no">Claims per year</p>
-        <BarChart height={200} data={curve.map(([y, v]) => ({ year: y, n: v[0] }))} x="year" y="n" yDomain={[0, 8]} formatTooltip={(d) => `${String(d.year)}: ${String(d.n)} claims`} />
+        <BarChart height={200} data={run.curve.map(([y, v]) => ({ year: y, n: v[0] }))} x="year" y="n" yDomain={[0, top]} formatTooltip={(d) => `${String(d.year)}: ${String(d.n)} claims`} />
       </div>
       <div>
         <p className="ab-no">Contradiction links per year</p>
-        <BarChart height={200} data={curve.map(([y, v]) => ({ year: y, n: v[1] }))} x="year" y="n" yDomain={[0, 8]} formatTooltip={(d) => `${String(d.year)}: ${String(d.n)} links`} />
+        <BarChart height={200} data={run.curve.map(([y, v]) => ({ year: y, n: v[1] }))} x="year" y="n" yDomain={[0, top]} formatTooltip={(d) => `${String(d.year)}: ${String(d.n)} links`} />
       </div>
     </div>
   )
 }
 
-export function AnswerBundle() {
+export function AnswerBundle({ run }: { run: RunData }) {
   const [tab, setTab] = useState<Tab>('positions')
   const [open, setOpen] = useState(false)
   return (
     <div className="ab">
-      <BottomLine />
-      <Checks />
+      <BottomLine run={run} />
+      <Checks run={run} />
       <div className="ab-more">
         <button className="ab-toggle" onClick={() => setOpen(!open)} aria-expanded={open}>{open ? 'Hide the reasoning' : 'Show the reasoning'} <span aria-hidden>{open ? '▴' : '▾'}</span></button>
-        <span className="ab-meta">{claims.length} claims · {contradictions.length} claim-level contradiction links · {meta.model}</span>
+        <span className="ab-meta">{run.claims.length} claims · {contradictionsOf(run).length} claim-level contradiction links · {run.model}{run.seconds ? ` · ${run.seconds}s on this device` : ''}</span>
       </div>
       {open && (
         <>
@@ -197,12 +203,12 @@ export function AnswerBundle() {
             ]} />
           </div>
           <div key={tab} className="ab-panel">
-            {tab === 'positions' && <PositionsTab />}
-            {tab === 'graph' && <ClaimGraph />}
-            {tab === 'conflicts' && <ConflictsTab />}
-            {tab === 'diff' && <DiffTab />}
-            {tab === 'sources' && <SourcesTab />}
-            {tab === 'time' && <TimeTab />}
+            {tab === 'positions' && <PositionsTab run={run} />}
+            {tab === 'graph' && <ClaimGraph run={run} />}
+            {tab === 'conflicts' && <ConflictsTab run={run} />}
+            {tab === 'diff' && <DiffTab run={run} />}
+            {tab === 'sources' && <SourcesTab run={run} />}
+            {tab === 'time' && <TimeTab run={run} />}
           </div>
         </>
       )}

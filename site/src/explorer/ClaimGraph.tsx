@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
-import { claims, edges } from './data'
+import type { RunData } from './data'
 
-const W = 560, H = 360
+const W = 560, H = 380
 const DOC_COLORS = ['#7fb0ff', '#ff9fb2', '#9df0b5']
 
 /** Claim graph: nodes are claims (coloured by source document), green links support, red dashed links contradict. */
-export function ClaimGraph({ compact = false }: { compact?: boolean }) {
+export function ClaimGraph({ run, compact = false }: { run: RunData; compact?: boolean }) {
+  const { claims, edges } = run
   const [hot, setHot] = useState<string | null>(null)
   const docs = [...new Set(claims.map((c) => c.doc_id))]
   const pos = useMemo(() => {
@@ -19,7 +20,7 @@ export function ClaimGraph({ compact = false }: { compact?: boolean }) {
       })
     })
     return p
-  }, [docs.length])
+  }, [docs.length, claims])
   const near = (id: string) => hot === id || edges.some((e) => (e.source === hot && e.target === id) || (e.target === hot && e.source === id))
   const hotClaim = claims.find((c) => c.id === hot)
   return (
