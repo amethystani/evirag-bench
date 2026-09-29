@@ -22,6 +22,16 @@ const edits = {
     ['"Nous Research"', '"Evirag"'],
     ['"Hermes Agent v0.17.0"', '"Evirag Bench v0.1.0"']
   ],
+  'components/landing-download-button/index.js': [
+    ['`Download for ${platform.title}`', '"Download source code"'],
+    ['linux ? "Install via terminal"', 'linux ? "Run locally"']
+  ],
+  'components/platform-card/index.js': [['installLabel = "Install via terminal"', 'installLabel = "Run locally"']],
+  'components/install-command/index.js': [
+    ['children: "macOS / Linux"', 'children: "Cargo"'],
+    ['children: "Windows"', 'children: "Git"']
+  ],
+  'hermes-landing/sections/landing-features.js': [['{ children: "Preview" }', '{ children: "Overview" }']],
   'components/badges/nous-girl.js': [['return /* @__PURE__ */ jsx("img"', 'return null; /* @__PURE__ */ jsx("img"']]
 }
 

@@ -30,8 +30,6 @@ import { createRoot } from 'react-dom/client'
 import './styles.css'
 
 const REPO = 'https://github.com/amethystani/evirag-bench'
-const V = 'v0.1.0'
-const asset = (target: string) => `${REPO}/releases/download/${V}/evirag-bench-${V}-${target}.tar.gz`
 
 const base = createHermesLandingContent()
 
@@ -60,7 +58,7 @@ const content: HermesLandingContent = {
     nousLogo: BLANK,
     footerGirl: { poster: BLANK, stackedSrc: '', webmSrc: '' }
   },
-  downloadLabel: 'Download the binary',
+  downloadLabel: 'Get the code',
   features,
   footer: {
     legal: [
@@ -77,14 +75,15 @@ const content: HermesLandingContent = {
   },
   install: {
     ...base.install,
+    label: 'Run locally',
     unixCommand: `cargo install --git ${REPO}`,
-    widthAnchor: `cargo install --git ${REPO}`,
-    windowsCommand: `cargo install --git ${REPO}`
+    widthAnchor: `git clone ${REPO} && cd evirag-bench && cargo build --release`,
+    windowsCommand: `git clone ${REPO} && cd evirag-bench && cargo build --release`
   },
   platforms: [
-    { detail: 'Apple silicon', match: ['Mac'], os: 'mac', title: 'Mac OS' },
-    { detail: 'Build from source', match: ['Win'], os: 'windows', title: 'Windows' },
-    { detail: 'x86_64', match: ['Linux', 'X11'], os: 'linux', title: 'Linux' }
+    { detail: 'macOS and Linux', match: ['Mac'], os: 'mac', title: 'Prebuilt Binary' },
+    { detail: 'Rust, any platform', match: ['Win'], os: 'windows', title: 'Source Code' },
+    { detail: 'Ollama and cargo', match: ['Linux', 'X11'], os: 'linux', title: 'Run Locally' }
   ],
   portal: {
     body: 'Disagreement-Aware Scientific Retrieval-Augmented Generation. Mishra, Sharma and Khetarpaul.',
@@ -95,10 +94,17 @@ const content: HermesLandingContent = {
   }
 }
 
+const SOURCE_ZIP = `${REPO}/archive/refs/heads/main.zip`
+// Hero button: always the source archive. Cards: binary, source, local run.
+const heroDownloads: HermesLandingDownloads = {
+  mac: { direct: true, href: SOURCE_ZIP },
+  linux: { direct: true, href: SOURCE_ZIP },
+  windows: { direct: true, href: SOURCE_ZIP }
+}
 const downloads: HermesLandingDownloads = {
-  mac: { direct: true, href: asset('aarch64-apple-darwin') },
-  linux: { direct: true, href: asset('x86_64-unknown-linux-gnu') },
-  windows: { direct: false, href: `${REPO}#ii-quickstart` }
+  mac: { direct: false, href: `${REPO}/releases/latest` },
+  linux: { direct: false, href: '#install' },
+  windows: { direct: true, href: SOURCE_ZIP }
 }
 
 const basePricing = createHermesPricingContent()
@@ -174,9 +180,9 @@ function App() {
               label: 'Install',
               prefix: <DownloadIcon className="!size-[18px] shrink-0" />,
               items: [
-                { href: '#downloads', icon: <AppleIcon aria-hidden className="size-6" />, label: 'macOS' },
-                { href: '#downloads', icon: <WindowsIcon aria-hidden className="size-6" />, label: 'Windows' },
-                { href: '#install', icon: <UbuntuIcon aria-hidden className="size-6" />, label: 'Install via terminal' }
+                { href: '#downloads', icon: <AppleIcon aria-hidden className="size-6" />, label: 'Prebuilt binary' },
+                { href: '#downloads', icon: <WindowsIcon aria-hidden className="size-6" />, label: 'Source code' },
+                { href: '#install', icon: <UbuntuIcon aria-hidden className="size-6" />, label: 'Run locally' }
               ]
             },
             { type: 'link', label: 'Runs', href: '#runs' },
@@ -204,14 +210,14 @@ function App() {
           ]
         } as never}
       />
-      <HermesLandingHero content={content} downloads={downloads} />
+      <HermesLandingHero content={content} downloads={heroDownloads} />
       <HermesLandingShowcase content={content} />
       <Section>
         <h2 className="text-[calc(72*var(--u))] leading-none font-light tracking-[0.03em]">
-          Evirag Bench
+          Ways To Run It
         </h2>
         <p className="hw-mono mt-[calc(24*var(--u))] text-[var(--hw-text-body)] opacity-90">
-          Available on macOS and Linux.
+          A prebuilt binary, the source code, or a local build with Ollama.
         </p>
       </Section>
       <HermesLandingPlatforms content={content} downloads={downloads} />
