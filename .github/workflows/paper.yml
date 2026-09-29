@@ -16,7 +16,7 @@ jobs:
       - name: Compile
         working-directory: paper
         run: tectonic -X compile acl_latex.tex --keep-logs
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: paper
           path: paper/acl_latex.pdf
