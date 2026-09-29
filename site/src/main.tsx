@@ -41,7 +41,8 @@ import { Results } from './sections/Results'
 import { Output } from './sections/Output'
 import { Glossary } from './sections/Glossary'
 import { Overlay } from './retro/Overlay'
-import { Marquee } from './retro/Marquee'
+import { Statement } from './retro/Statement'
+import { enableTilt } from './retro/tilt'
 import { Boot } from './retro/Boot'
 import { Timeline } from './retro/Timeline'
 import { createRoot } from 'react-dom/client'
@@ -256,7 +257,7 @@ function App() {
       <HermesLandingHero content={content} downloads={heroDownloads} />
       <HermesLandingShowcase content={content} />
       <Stats />
-      <Marquee items={['Epistemic collapse', 'Claim graph', 'CDA-7', 'Signed Louvain', 'Skeptic agent', 'Source-linked views']} />
+      <Statement text="Not every question has one answer. Some have three, and they disagree for reasons that matter." accent={['three,','disagree','matter']} sub="So keep the disagreement." />
       <Boot />
       <Problem />
       <Example />
@@ -266,7 +267,7 @@ function App() {
       <Graph />
       <Typology />
       <Timeline />
-      <Marquee reverse items={['989 papers', '43,155 chunks', '63,955 claims', '1,250 queries', 'Five domains', 'Four classes']} />
+      <Statement text="A benchmark should reward the spread of evidence, not the smoothest sentence." accent={['spread','evidence,']} sub="That is what EVIRAG-Bench measures." />
       <Bench />
       <Metrics />
       <Results />
@@ -308,6 +309,8 @@ function App() {
     </HermesLandingShell>
   )
 }
+
+enableTilt()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
