@@ -107,6 +107,7 @@ const tierText = [
 ]
 const pricing: HermesPricingContent = {
   ...basePricing,
+  assets: { badge: BLANK },
   tiers: basePricing.tiers.map((tier, i) => ({ ...tier, ...tierText[i], badge: undefined }))
 }
 
