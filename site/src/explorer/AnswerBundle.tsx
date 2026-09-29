@@ -2,51 +2,123 @@ import { Badge, BadgeGroup, Progress, Segmented } from '@nous-research/ui'
 import { BarChart } from '@nous-research/ui/ui/components/graphs/index'
 import { useState } from 'react'
 import compare from '../answer_compare.json'
-import { chunks, claims, contradictions, curve, edges, meta, supports, views } from './data'
+import { chunks, claims, contradictions, curve, meta, views } from './data'
+import { CAUSE_PLAIN, claimOf, dominantCause, looksLikeCaveat, runChecks, tensions, trustLine, unsupportedWords } from './checks'
 import { ClaimGraph } from './ClaimGraph'
 
-type Tab = 'answer' | 'graph' | 'conflicts' | 'diff' | 'sources' | 'time'
-const claimById = (id: string) => claims.find((c) => c.id === id)!
+type Tab = 'positions' | 'graph' | 'conflicts' | 'diff' | 'sources' | 'time'
+const yearOf = (source: string) => chunks.find((c) => c.id === source)?.year
+const docOf = (source: string) => source.split(':')[0]
 const tierPct = (t: string) => (t === 'high' ? 90 : t === 'medium' ? 55 : 25)
+const TIER_WORDS: Record<string, string> = { high: 'Well supported', medium: 'Partly supported', low: 'Thinly supported' }
 
-function AnswerTab() {
+function answerText() {
+  const lines = [`Q: ${meta.question}`, '', views.length > 1 ? `The sources disagree. ${views.length} positions:` : 'One position:']
+  views.forEach((v, i) => lines.push(`${i + 1}. ${v.position} (${[...new Set(v.sources.map(docOf))].join(', ')})`))
+  const cause = dominantCause()
+  if (cause) lines.push('', `Most likely reason they differ: ${CAUSE_PLAIN[cause] ?? cause} (automatic label).`)
+  lines.push('', trustLine(), '', ...runChecks().map((c) => `${c.ok ? '[ok]' : '[check]'} ${c.label}`))
+  return lines.join('\n')
+}
+
+function BottomLine() {
+  const cause = dominantCause()
+  const t = tensions()
+  const [copied, setCopied] = useState(false)
+  const copy = () => { navigator.clipboard?.writeText(answerText()).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1800) }, () => {}) }
+  return (
+    <section className="ab-bottom" aria-label="Bottom line">
+      <div className="ab-headrow"><p className="ab-kicker">Bottom line</p><button className="ab-copy" onClick={copy}>{copied ? 'Copied' : 'Copy answer'}</button></div>
+      <p className="ab-lead">
+        {views.length > 1
+          ? `The sources do not agree, so this answer keeps ${views.length} positions apart instead of blending them into one.`
+          : 'The sources broadly agree on one position.'}
+      </p>
+      <ol className="ab-positions">
+        {views.map((v) => (
+          <li key={v.position}>
+            <span>{v.position}</span>
+            <em>{[...new Set(v.sources.map(docOf))].map((d) => `${d}${yearOf(v.sources.find((s) => docOf(s) === d)!) ? `, ${yearOf(v.sources.find((s) => docOf(s) === d)!)}` : ''}`).join(' · ')}</em>
+          </li>
+        ))}
+      </ol>
+      {cause && t.length > 0 && (
+        <p className="ab-why"><b>Why they differ.</b> Most likely because {CAUSE_PLAIN[cause] ?? cause}. This label is produced automatically; check it against the passages.</p>
+      )}
+      <p className="ab-trust">{trustLine()}</p>
+    </section>
+  )
+}
+
+function Checks() {
+  const checks = runChecks()
+  return (
+    <section className="ab-checks" aria-label="Automatic checks">
+      <p className="ab-kicker">Automatic checks</p>
+      <ul>
+        {checks.map((c) => (
+          <li key={c.label} className={c.ok ? 'ab-ok' : 'ab-warn'}>
+            <span aria-hidden>{c.ok ? '✓' : '!'}</span>
+            <span>{c.label}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+function PositionsTab() {
   return (
     <div className="ab-stack">
-      {views.map((v, i) => (
-        <article key={v.position} className="ab-card">
-          <div className="ab-card-head">
-            <span className="ab-no">View {i + 1}</span>
-            <BadgeGroup surface="blue" type="outline">
-              <BadgeGroup.Item>{v.confidence_tier} confidence</BadgeGroup.Item>
-              {v.disagreement_causes.map((c) => <BadgeGroup.Item key={c}>{c}</BadgeGroup.Item>)}
-            </BadgeGroup>
-          </div>
-          <h4>{v.position}</h4>
-          <p className="ab-p">{v.summary}</p>
-          <p className="ab-p ab-dim"><b>Weaknesses.</b> {v.weaknesses}</p>
-          <Progress aria-label={`${v.confidence_tier} confidence`} value={tierPct(v.confidence_tier)} />
-          <p className="ab-src">Sources: {v.sources.map((s) => <code key={s}>{s}</code>)}</p>
-        </article>
-      ))}
+      {views.map((v, i) => {
+        const extra = unsupportedWords(v)
+        return (
+          <article key={v.position} className="ab-card">
+            <div className="ab-card-head">
+              <span className="ab-no">Position {i + 1}</span>
+              <Badge type="outline" surface="blue">{TIER_WORDS[v.confidence_tier] ?? v.confidence_tier}</Badge>
+            </div>
+            <h4>{v.position}</h4>
+            <p className="ab-p">{v.summary}</p>
+            {v.weaknesses && !/^unclear/i.test(v.weaknesses) && <p className="ab-p ab-dim"><b>Limits.</b> {v.weaknesses}</p>}
+            {extra.length > 0 && <p className="ab-flag">Check: “{extra.slice(0, 5).join(', ')}” does not appear in the passages this position cites.</p>}
+            <Progress aria-label={`${v.confidence_tier} confidence`} value={tierPct(v.confidence_tier)} />
+            <p className="ab-src">Cites {v.sources.map((s) => <code key={s}>{s}</code>)}</p>
+          </article>
+        )
+      })}
     </div>
   )
 }
 
 function ConflictsTab() {
+  const groups = tensions()
   return (
     <div className="ab-stack">
-      <p className="ab-p ab-dim">{contradictions.length} contradiction links. Each pair of claims cannot both hold, and each carries a CDA-7 cause.</p>
-      {contradictions.map((e, i) => {
-        const a = claimById(e.source), b = claimById(e.target)
-        return (
-          <article key={i} className="ab-card ab-conflict">
-            <div className="ab-side"><span className="ab-id">{a.id} · {a.doc_id} · {a.year}</span><p>{a.text}</p></div>
-            <span className="ab-vs" aria-hidden>✕</span>
-            <div className="ab-side"><span className="ab-id">{b.id} · {b.doc_id} · {b.year}</span><p>{b.text}</p></div>
-            <Badge type="outline" surface="blue">{e.cda7 ?? 'unlabelled'}</Badge>
-          </article>
-        )
-      })}
+      <p className="ab-p ab-dim">Claim-level links are grouped by the two sources they come from, so one disagreement is not counted many times.</p>
+      {groups.map((g) => (
+        <article key={g.a + g.b} className="ab-card">
+          <div className="ab-card-head">
+            <span className="ab-no">{g.a} ({g.aYear}) vs {g.b} ({g.bYear})</span>
+            <BadgeGroup surface="blue" type="outline">
+              <BadgeGroup.Item>{g.direct} direct</BadgeGroup.Item>
+              <BadgeGroup.Item>{g.pairs.length - g.direct} look like caveats</BadgeGroup.Item>
+            </BadgeGroup>
+          </div>
+          {g.pairs.map((e, i) => {
+            const a = claimOf(e.source), b = claimOf(e.target)
+            const caveat = looksLikeCaveat(e)
+            return (
+              <div key={i} className={`ab-pair ${caveat ? 'ab-pair-dim' : ''}`}>
+                <p><span className="ab-id">{a.doc_id}</span> {a.text}</p>
+                <span className="ab-vs" aria-hidden>{caveat ? '≈' : '✕'}</span>
+                <p><span className="ab-id">{b.doc_id}</span> {b.text}</p>
+                <span className="ab-cause">{e.cda7 ?? 'no cause'}{caveat ? ' · caveat, not a direct contradiction' : ''}</span>
+              </div>
+            )
+          })}
+        </article>
+      ))}
     </div>
   )
 }
@@ -57,22 +129,22 @@ function DiffTab() {
     <div className="ab-stack">
       <div className="ab-diff">
         <section className="ab-card">
-          <p className="ab-no">Vanilla RAG</p>
+          <p className="ab-no">Vanilla RAG: one answer</p>
           <p className="ab-p">{compare.vanilla}</p>
-          <ul className="ab-facts"><li><b>1</b> answer</li><li><b>0</b> contradictions shown</li><li>Contradiction recall <b>{cr.vanilla.toFixed(1)}</b></li></ul>
+          <p className="ab-p ab-dim">Picks one side. The other position does not appear. Contradiction recall {cr.vanilla.toFixed(1)}.</p>
         </section>
         <section className="ab-card ab-card-hot">
-          <p className="ab-no">EVIRAG</p>
+          <p className="ab-no">EVIRAG: {views.length} positions</p>
           <ol className="ab-mini">{views.map((v) => <li key={v.position}>{v.position}</li>)}</ol>
-          <ul className="ab-facts"><li><b>{views.length}</b> views</li><li><b>{contradictions.length}</b> contradictions, each with a cause</li><li>Contradiction recall <b>{cr.full.toFixed(1)}</b></li></ul>
+          <p className="ab-p ab-dim">Keeps the disagreement and says where it comes from. Contradiction recall {cr.full.toFixed(1)}.</p>
         </section>
       </div>
       <section className="ab-card">
-        <p className="ab-no">Structured prompt (one call, no graph)</p>
+        <p className="ab-no">One structured prompt, no graph</p>
         <p className="ab-p">{compare.structured}</p>
-        <p className="ab-p ab-dim">Contradiction recall {cr.structured.toFixed(1)}. On this one query a strong prompt also names both sides, so this run does not show the graph beating it. The paper's full benchmark is where that comparison is made.</p>
+        <p className="ab-p ab-dim">Contradiction recall {cr.structured.toFixed(1)}. On this single query a good prompt also names both sides, so this run does not show the graph beating it. That comparison is made on the full benchmark in the paper.</p>
       </section>
-      <p className="ab-p ab-dim">From the preliminary check on the saved run ({compare.model}). One query, a small model: it shows the mechanism, not benchmark quality.</p>
+      <p className="ab-p ab-dim">Model: {compare.model}. One query on a two-passage demo corpus: it shows the mechanism, not benchmark quality.</p>
     </div>
   )
 }
@@ -105,33 +177,35 @@ function TimeTab() {
   )
 }
 
-export function AnswerBundle({ matched }: { matched: boolean }) {
-  const [tab, setTab] = useState<Tab>('answer')
+export function AnswerBundle() {
+  const [tab, setTab] = useState<Tab>('positions')
+  const [open, setOpen] = useState(false)
   return (
     <div className="ab">
-      <div className="ab-summary">
-        <div><b>{meta.cls}</b><span>controversy class</span></div>
-        <div><b>{views.length}</b><span>views</span></div>
-        <div><b>{claims.length}</b><span>claims</span></div>
-        <div><b>{supports.length}</b><span>support links</span></div>
-        <div><b>{contradictions.length}</b><span>contradictions</span></div>
+      <BottomLine />
+      <Checks />
+      <div className="ab-more">
+        <button className="ab-toggle" onClick={() => setOpen(!open)} aria-expanded={open}>{open ? 'Hide the reasoning' : 'Show the reasoning'} <span aria-hidden>{open ? '▴' : '▾'}</span></button>
+        <span className="ab-meta">{claims.length} claims · {contradictions.length} claim-level contradiction links · {meta.model}</span>
       </div>
-      {!matched && <p className="ab-note">Live answers for new questions will go live later. This is the saved run, which answers “{meta.question}”.</p>}
-      <div className="ab-tabs">
-        <Segmented aria-label="Answer sections" size="sm" value={tab} onChange={setTab} options={[
-          { label: 'Answer', value: 'answer' }, { label: 'Graph', value: 'graph' }, { label: 'Contradictions', value: 'conflicts' },
-          { label: 'Vs vanilla', value: 'diff' }, { label: 'Sources', value: 'sources' }, { label: 'Time', value: 'time' }
-        ]} />
-      </div>
-      <div key={tab} className="ab-panel">
-        {tab === 'answer' && <AnswerTab />}
-        {tab === 'graph' && <ClaimGraph />}
-        {tab === 'conflicts' && <ConflictsTab />}
-        {tab === 'diff' && <DiffTab />}
-        {tab === 'sources' && <SourcesTab />}
-        {tab === 'time' && <TimeTab />}
-      </div>
-      <p className="ab-foot">{edges.length} links across {claims.length} claims from {chunks.length} passages.</p>
+      {open && (
+        <>
+          <div className="ab-tabs">
+            <Segmented aria-label="Reasoning" size="sm" value={tab} onChange={setTab} options={[
+              { label: 'Positions', value: 'positions' }, { label: 'Graph', value: 'graph' }, { label: 'Conflicts', value: 'conflicts' },
+              { label: 'Vs vanilla', value: 'diff' }, { label: 'Sources', value: 'sources' }, { label: 'Time', value: 'time' }
+            ]} />
+          </div>
+          <div key={tab} className="ab-panel">
+            {tab === 'positions' && <PositionsTab />}
+            {tab === 'graph' && <ClaimGraph />}
+            {tab === 'conflicts' && <ConflictsTab />}
+            {tab === 'diff' && <DiffTab />}
+            {tab === 'sources' && <SourcesTab />}
+            {tab === 'time' && <TimeTab />}
+          </div>
+        </>
+      )}
     </div>
   )
 }

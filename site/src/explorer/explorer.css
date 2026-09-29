@@ -236,3 +236,40 @@ kbd { font: 500 11px 'Courier Prime', monospace; opacity: .7; border: 1px solid 
 .ab-tabs > * { min-width: max-content; }
 .ab-panel svg { max-width: 100%; }
 .ex-main { min-width: 0; overflow-x: clip; }
+
+/* ---- report-style answer ---- */
+.chat-chip-main { display: grid; gap: 6px; font-size: 16px; padding: 16px 18px; border-color: var(--ex-accent); }
+.chat-chip-tag { font: 500 10px 'Courier Prime', monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--ex-accent); }
+.chat-domains { font: 400 12px/1.6 'Courier Prime', monospace; opacity: .7; margin: 6px 0 0 !important; }
+.chat-action { align-self: start; padding: 10px 18px; border-radius: 999px; border: 1px solid var(--ex-accent); background: transparent; color: var(--ex-accent); font: 500 14px var(--font-body); cursor: pointer; transition: background .2s; }
+.chat-action:hover { background: rgb(237 255 69 / .14); }
+.ab-bottom { padding: 16px 18px 12px; }
+.ab-kicker { margin: 0 0 8px; font: 500 11px 'Courier Prime', monospace; letter-spacing: .14em; text-transform: uppercase; opacity: .65; }
+.ab-lead { margin: 0 0 12px; font: 400 clamp(17px, 2.4vw, 20px)/1.4 var(--font-body); }
+.ab-positions { margin: 0 0 12px; padding-left: 20px; display: grid; gap: 10px; }
+.ab-positions li { font: 500 15px/1.4 var(--font-body); }
+.ab-positions em { display: block; margin-top: 2px; font: 400 11.5px 'Courier Prime', monospace; font-style: normal; opacity: .65; }
+.ab-why { margin: 0 0 10px; font: 400 13px/1.6 'Courier Prime', monospace; }
+.ab-trust { margin: 0; font: 400 12px 'Courier Prime', monospace; opacity: .7; }
+.ab-checks { margin: 0 14px 12px; padding: 12px 14px; border: 1px solid var(--ex-line); border-radius: 12px; background: rgb(0 0 0 / .14); }
+.ab-checks ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.ab-checks li { display: flex; gap: 10px; font: 400 12.5px/1.5 'Courier Prime', monospace; }
+.ab-checks li > span:first-child { flex: none; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; margin-top: 1px; }
+.ab-ok > span:first-child { background: #7ee2a0; color: #06331a; }
+.ab-warn > span:first-child { background: #ffd166; color: #4a3200; }
+.ab-more { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 4px 14px 12px; }
+.ab-toggle { padding: 8px 14px; border: 1px solid var(--ex-line); border-radius: 999px; background: rgb(255 255 255 / .08); color: inherit; font: 500 13px var(--font-body); cursor: pointer; }
+.ab-toggle:hover { background: rgb(255 255 255 / .16); }
+.ab-meta { font: 400 11.5px 'Courier Prime', monospace; opacity: .6; }
+.ab-flag { margin: 0; padding: 6px 10px; border-radius: 8px; background: rgb(255 209 102 / .15); border: 1px solid rgb(255 209 102 / .5); font: 400 12px/1.5 'Courier Prime', monospace; }
+.ab-pair { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px 12px; align-items: start; padding: 10px 0; border-top: 1px solid var(--ex-line); }
+.ab-pair p { margin: 0; font: 400 13px/1.5 var(--font-body); }
+.ab-pair-dim { opacity: .65; }
+.ab-cause { grid-column: 1 / -1; font: 500 11px 'Courier Prime', monospace; letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
+.ab-panel { padding-top: 4px; }
+@media (max-width: 760px) { .ab-pair { grid-template-columns: minmax(0, 1fr); } .ab-pair .ab-vs { justify-self: start; } }
+
+.ab-headrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ab-headrow .ab-kicker { margin: 0; }
+.ab-copy { padding: 5px 12px; border: 1px solid var(--ex-line); border-radius: 999px; background: transparent; color: inherit; font: 500 12px var(--font-body); cursor: pointer; }
+.ab-copy:hover { background: rgb(255 255 255 / .14); }

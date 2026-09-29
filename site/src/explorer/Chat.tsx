@@ -2,34 +2,30 @@ import { Badge, Spinner } from '@nous-research/ui'
 import { useEffect, useRef, useState } from 'react'
 import { AnswerBundle } from './AnswerBundle'
 
-export type Msg = { id: string; role: 'user' | 'assistant'; text: string; kind?: 'answer'; matched?: boolean }
+export type Msg = { id: string; role: 'user' | 'assistant'; text: string; kind?: 'answer' | 'notyet' }
 export type Conversation = { id: string; title: string; messages: Msg[] }
 
-export const SUGGESTIONS = [
-  'Does homework improve academic achievement?',
-  'Do statins help in primary prevention?',
-  'Does raising the minimum wage reduce employment?',
-  'How strong are the climate feedbacks?',
-  'How do dietary fats relate to cardiovascular risk?'
-]
+export const EXAMPLE_QUESTION = 'Does homework improve academic achievement?'
+export const DOMAINS = ['Education', 'Biomedicine', 'Economics', 'Earth sciences', 'Nutrition']
 
 const uid = () => Math.random().toString(36).slice(2, 10)
 export const newConversation = (): Conversation => ({ id: uid(), title: 'New chat', messages: [] })
 
-function Bubble({ m }: { m: Msg }) {
+function Bubble({ m, onExample }: { m: Msg; onExample: () => void }) {
   if (m.role === 'user') return <div className="chat-row chat-row-user"><div className="chat-bubble-user">{m.text}</div></div>
   return (
     <div className="chat-row">
       <span className="chat-avatar" aria-hidden>E</span>
       <div className="chat-assistant">
-        <p>{m.text}</p>
-        {m.kind === 'answer' && <AnswerBundle matched={m.matched ?? false} />}
+        {m.text && <p>{m.text}</p>}
+        {m.kind === 'answer' && <AnswerBundle />}
+        {m.kind === 'notyet' && <button className="chat-action" onClick={onExample}>See a worked example</button>}
       </div>
     </div>
   )
 }
 
-export function Chat({ conv, onSend }: { conv: Conversation; onSend: (text: string) => void }) {
+export function Chat({ conv, onSend, onExample }: { conv: Conversation; onSend: (text: string) => void; onExample: () => void }) {
   const [draft, setDraft] = useState('')
   const [pending, setPending] = useState(false)
   const endRef = useRef<HTMLDivElement>(null)
@@ -61,14 +57,16 @@ export function Chat({ conv, onSend }: { conv: Conversation; onSend: (text: stri
           <div className="chat-empty">
             <span className="chat-avatar chat-avatar-lg" aria-hidden>E</span>
             <h1>Ask about a contested question</h1>
-            <p>Answers come from a saved run for now. Live answers will go live later.</p>
-            <div className="chat-chips">
-              {SUGGESTIONS.map((s) => <button key={s} className="chat-chip" onClick={() => send(s)}>{s}</button>)}
-            </div>
+            <p>EVIRAG keeps the disagreement between scientific sources instead of blending it into one answer.</p>
+            <button className="chat-chip chat-chip-main" onClick={() => send(EXAMPLE_QUESTION)}>
+              <span className="chat-chip-tag">Worked example</span>
+              {EXAMPLE_QUESTION}
+            </button>
+            <p className="chat-domains">Live answers will go live later, across {DOMAINS.join(', ')}.</p>
           </div>
         ) : (
           <div className="chat-thread">
-            {conv.messages.map((m) => <Bubble key={m.id} m={m} />)}
+            {conv.messages.map((m) => <Bubble key={m.id} m={m} onExample={onExample} />)}
             {pending && (
               <div className="chat-row"><span className="chat-avatar" aria-hidden>E</span><div className="chat-assistant chat-typing"><Spinner /> Thinking</div></div>
             )}
@@ -90,12 +88,12 @@ export function Chat({ conv, onSend }: { conv: Conversation; onSend: (text: stri
           />
           <button type="submit" className="chat-send" disabled={!draft.trim() || pending} aria-label="Send">↑</button>
         </form>
-        <p className="chat-foot"><Badge type="outline" surface="blue">Preview</Badge> Answers come from a saved run. Live answers will go live later.</p>
+        <p className="chat-foot"><Badge type="outline" surface="blue">Preview</Badge> Only the worked example is answered for now. Live answers will go live later.</p>
       </div>
     </div>
   )
 }
 
-export function makeMessage(role: Msg['role'], text: string, kind?: Msg['kind'], matched?: boolean): Msg {
-  return { id: uid(), role, text, kind, matched }
+export function makeMessage(role: Msg['role'], text: string, kind?: Msg['kind']): Msg {
+  return { id: uid(), role, text, kind }
 }

@@ -157,7 +157,9 @@ export function App() {
     setChats((all) => all.map((c) => c.id === active.id ? { ...c, title: c.messages.length === 0 ? text.slice(0, 48) : c.title, messages: [...c.messages, u] } : c))
     setTimeout(() => {
       const matched = /homework/i.test(text)
-      const a = makeMessage('assistant', matched ? 'The literature here is contested, so the answer stays as separate views. Below are the views, the claim graph, the contradictions and how it differs from a single answer.' : 'Here is what an EVIRAG answer looks like.', 'answer', matched)
+      const a = matched
+        ? makeMessage('assistant', '', 'answer')
+        : makeMessage('assistant', 'Live answers are not available yet, so I cannot answer that question. This chat will go live later. I can show you a worked example of what an answer looks like.', 'notyet')
       setChats((all) => all.map((c) => c.id === active.id ? { ...c, messages: [...c.messages, a] } : c))
     }, 900)
   }
@@ -243,7 +245,7 @@ export function App() {
           )}
         </header>
         {isChat ? (
-          <main className="ex-chatmain" key={active.id}><Chat conv={active} onSend={sendMessage} /></main>
+          <main className="ex-chatmain" key={active.id}><Chat conv={active} onSend={sendMessage} onExample={() => setChats((all) => all.map((c) => c.id === active.id ? { ...c, messages: [...c.messages, makeMessage('assistant', 'Worked example: “Does homework improve academic achievement?”', 'answer')] } : c))} /></main>
         ) : (
           <main className="ex-content" key={current.path}><div className="ex-page surface-white" data-surface="white">{page}</div></main>
         )}
