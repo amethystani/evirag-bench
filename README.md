@@ -1,31 +1,26 @@
-<p align="center"><img src="docs/assets/hero.jpg" alt="EVIRAG: retrieval that keeps the disagreement" width="100%"></p>
+<p align="center"><img src="docs/assets/hero.jpg" alt="EVIRAG" width="100%"></p>
 
 <p align="center">
   <img alt="Rust" src="https://img.shields.io/badge/Rust-2021-b7410e?style=flat-square&logo=rust&logoColor=white">
   <img alt="Ollama" src="https://img.shields.io/badge/Ollama-local_models-1f3fbf?style=flat-square">
-  <img alt="EMNLP" src="https://img.shields.io/badge/EMNLP-camera--ready-1f3fbf?style=flat-square">
   <img alt="Benchmark" src="https://img.shields.io/badge/benchmark-1%2C250_queries-6b7fd6?style=flat-square">
 </p>
-
-<p align="center"><b>One question in. Several evidence-backed positions out, each tied to its source passages.</b></p>
 
 EVIRAG preserves disagreement across scientific retrieval and answer generation. The Rust executable provides the seven-stage pipeline, evaluation metrics, corpus tools, and baseline controls. The paper source and PDF are in `paper/`.
 
 <p align="center">
-  <a href="#the-pipeline">Pipeline</a> ·
-  <a href="#quickstart">Quickstart</a> ·
-  <a href="#corpus-and-benchmark">Corpus</a> ·
-  <a href="#run">Run</a> ·
-  <a href="#paper">Paper</a>
+  <a href="#i-pipeline">I. Pipeline</a> ·
+  <a href="#ii-quickstart">II. Quickstart</a> ·
+  <a href="#iii-corpus-and-benchmark">III. Corpus</a> ·
+  <a href="#iv-run">IV. Run</a> ·
+  <a href="#v-paper">V. Paper</a>
 </p>
 
 ---
 
-<img src="docs/assets/pipeline.jpg" alt="Seven stages, many views" width="100%">
+<img src="docs/assets/pipeline.jpg" alt="Pipeline" width="100%">
 
-## The pipeline
-
-A standard RAG system collapses conflicting sources into one confident answer. EVIRAG keeps the conflict and explains it.
+## I. Pipeline
 
 ```text
 question ─► intent ─► role-based retrieval ─► atomic claims ─► pair labels + CDA-7 causes
@@ -56,9 +51,9 @@ Every contradiction edge is labeled with one primary cause. The full guide is in
 
 ---
 
-<img src="docs/assets/quickstart.jpg" alt="Build it. Run it." width="100%">
+<img src="docs/assets/quickstart.jpg" alt="Quickstart" width="100%">
 
-## Quickstart
+## II. Quickstart
 
 Install Rust and [Ollama](https://ollama.com/download). Start Ollama in one terminal:
 
@@ -77,9 +72,9 @@ The default run uses `qwen3.6:35b-a3b` and `all-minilm`. Use `scripts/fetch_mode
 
 ---
 
-<img src="docs/assets/corpus.jpg" alt="Bring your own corpus" width="100%">
+<img src="docs/assets/corpus.jpg" alt="Corpus and benchmark" width="100%">
 
-## Corpus and benchmark
+## III. Corpus and benchmark
 
 Documents are JSON Lines with `id`, `title`, `text`, optional `year`, `venue`, `domain`, `doi`, and `sections`. Each section has a `heading` and `text`. The chunker uses the pinned MiniLM tokenizer to make 256-token passages with overlap 32 within section boundaries. Document and chunk IDs keep claims linked to passages. The tokenizer is downloaded once into `data/tokenizer.json`.
 
@@ -101,9 +96,9 @@ Use `--full` for the 1,250-query, five-domain benchmark layout.
 
 ---
 
-<img src="docs/assets/run.jpg" alt="Every baseline, one script" width="100%">
+<img src="docs/assets/run.jpg" alt="Run" width="100%">
 
-## Run
+## IV. Run
 
 ```sh
 target/release/evirag-bench chunk data/corpus/documents.jsonl data/corpus/chunks.jsonl
@@ -124,9 +119,9 @@ For a quick sanity check of the core mechanism, `scripts/preliminary_check.sh` r
 
 ---
 
-<img src="docs/assets/paper.jpg" alt="Read the paper" width="100%">
+<img src="docs/assets/paper.jpg" alt="Paper" width="100%">
 
-## Paper
+## V. Paper
 
 `paper/acl_latex.tex` is the camera-ready source, with its bibliography, figure, ACL style files, and PDF. Run `cd paper && ./build.sh` if `tectonic` is installed.
 
