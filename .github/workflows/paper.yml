@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: wtfjoke/setup-tectonic@v3
+      - uses: wtfjoke/setup-tectonic@v4
       - name: Compile
         working-directory: paper
         run: tectonic -X compile acl_latex.tex --keep-logs
