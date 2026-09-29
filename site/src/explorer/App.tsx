@@ -156,7 +156,8 @@ export function App() {
     const u = makeMessage('user', text)
     setChats((all) => all.map((c) => c.id === active.id ? { ...c, title: c.messages.length === 0 ? text.slice(0, 48) : c.title, messages: [...c.messages, u] } : c))
     setTimeout(() => {
-      const a = makeMessage('assistant', 'Thanks for the question.', 'soon')
+      const matched = /homework/i.test(text)
+      const a = makeMessage('assistant', matched ? 'The literature here is contested, so the answer stays as separate views. Below are the views, the claim graph, the contradictions and how it differs from a single answer.' : 'Here is what an EVIRAG answer looks like.', 'answer', matched)
       setChats((all) => all.map((c) => c.id === active.id ? { ...c, messages: [...c.messages, a] } : c))
     }, 900)
   }
