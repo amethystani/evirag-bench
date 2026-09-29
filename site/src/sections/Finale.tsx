@@ -1,7 +1,48 @@
-import { DropdownMenu, FitText, Poster, Separator, Toast, useGpuTier, useToast, Watchlist } from '@nous-research/ui'
+import { DropdownMenu, Poster, Separator, Toast, useGpuTier, useToast, Watchlist } from '@nous-research/ui'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Reveal } from '../hooks'
 
-const FitTextAny = FitText as unknown as React.ComponentType<Record<string, unknown>>
+/** One line of text scaled so it fills exactly the width of its container. */
+function FitLine({ text }: { text: string }) {
+  const box = useRef<HTMLDivElement>(null)
+  const span = useRef<HTMLSpanElement>(null)
+  const fit = useCallback(() => {
+    const b = box.current, s = span.current
+    if (!b || !s) return
+    s.style.fontSize = '100px'
+    const w = s.getBoundingClientRect().width
+    if (!w || !b.clientWidth) return
+    s.style.fontSize = `${Math.floor((b.clientWidth / w) * 100 * 0.99 * 10) / 10}px`
+  }, [])
+  useLayoutEffect(fit, [fit, text])
+  useEffect(() => {
+    const b = box.current
+    if (!b) return
+    const ro = new ResizeObserver(fit)
+    ro.observe(b)
+    void document.fonts?.ready.then(fit)
+    return () => ro.disconnect()
+  }, [fit])
+  return <div ref={box} className="fit-box"><span ref={span} className="fit-line">{text}</span></div>
+}
+
+/** Edge-to-edge closing wordmark: one line when there is room, two lines on narrow screens. */
+function Wordmark() {
+  const ref = useRef<HTMLDivElement>(null)
+  const [narrow, setNarrow] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const ro = new ResizeObserver(() => setNarrow(el.clientWidth < 720))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  return (
+    <div ref={ref} className="fit-wordmark" aria-label="Keep the disagreement">
+      {narrow ? (<><FitLine text="Keep the" /><FitLine text="disagreement" /></>) : <FitLine text="Keep the disagreement" />}
+    </div>
+  )
+}
 const REPO = 'https://github.com/amethystani/evirag-bench'
 const BIBTEX = `@inproceedings{mishra2026evirag,
   title     = {Beyond Epistemic Collapse: Disagreement-Aware Scientific Retrieval-Augmented Generation},
@@ -24,7 +65,7 @@ export function Finale() {
   }
 
   return (
-    <section id="finale" className="px-[var(--hw-gutter)] pt-[calc(120*var(--u))] pb-[calc(60*var(--u))] max-md:px-5 max-md:pt-16">
+    <section id="finale" className="finale px-[var(--hw-gutter)] pt-[calc(120*var(--u))] pb-[calc(60*var(--u))] max-md:px-5 max-md:pt-16">
       <Reveal>
         <div className="grid items-center gap-[calc(70*var(--u))] md:grid-cols-[1fr_1.1fr] max-md:gap-8">
           <div className="poster-wrap">
@@ -87,7 +128,7 @@ export function Finale() {
       </div>
 
       <div className="mt-[calc(120*var(--u))] max-md:mt-14">
-        <FitTextAny as="p" className="fit-wordmark" min="2rem" max="22rem">Keep the disagreement</FitTextAny>
+        <Wordmark />
       </div>
       <Toast toast={toast} />
     </section>
