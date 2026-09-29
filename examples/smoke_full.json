@@ -1,0 +1,183 @@
+{
+  "id": "smoke_001",
+  "question": "Does homework improve academic achievement?",
+  "model": "qwen2.5:0.5b",
+  "controversy_class": "polarized",
+  "views": [
+    {
+      "position": "More homework does not consistently improve achievement.",
+      "summary": "The evidence suggests that more homework does not consistently improve academic achievement.",
+      "weaknesses": "Unclear from the retrieved passages.",
+      "sources": [
+        "edu_a:0:0",
+        "edu_b:0:0"
+      ],
+      "disagreement_causes": [
+        "methodological"
+      ],
+      "confidence_tier": "low"
+    },
+    {
+      "position": "Homework practice is associated with higher achievement in mathematics.",
+      "summary": "The evidence suggests that homework practice is associated with higher mathematics achievement, but the observational design cannot determine the exact cause of this relationship.",
+      "weaknesses": "The observational design cannot determine the exact cause of the relationship between homework practice and mathematics achievement.",
+      "sources": [
+        "edu_a:0:0"
+      ],
+      "disagreement_causes": [
+        "methodological"
+      ],
+      "confidence_tier": "low"
+    },
+    {
+      "position": "Observational design cannot rule out family support as a confounder.",
+      "summary": "The evidence suggests that homework may not necessarily improve academic achievement, as it is influenced by various factors such as family support and individual learning styles.",
+      "weaknesses": "The observational design cannot rule out the influence of family support as a confounder, which means that the results may not be generalizable to all students and families.",
+      "sources": [
+        "edu_a:0:0"
+      ],
+      "disagreement_causes": [],
+      "confidence_tier": "medium"
+    }
+  ],
+  "claims": [
+    {
+      "id": "c0",
+      "text": "More homework does not consistently improve achievement.",
+      "doc_id": "edu_b",
+      "chunk_id": "edu_b:0:0",
+      "year": 2015
+    },
+    {
+      "id": "c1",
+      "text": "Heavy assignments can reduce sleep and family time.",
+      "doc_id": "edu_b",
+      "chunk_id": "edu_b:0:0",
+      "year": 2015
+    },
+    {
+      "id": "c2",
+      "text": "In primary school, more homework does not consistently improve achievement.",
+      "doc_id": "edu_b",
+      "chunk_id": "edu_b:0:0",
+      "year": 2015
+    },
+    {
+      "id": "c3",
+      "text": "Homework practice is associated with higher achievement in mathematics.",
+      "doc_id": "edu_a",
+      "chunk_id": "edu_a:0:0",
+      "year": 2006
+    },
+    {
+      "id": "c4",
+      "text": "Observational design cannot rule out family support as a confounder.",
+      "doc_id": "edu_a",
+      "chunk_id": "edu_a:0:0",
+      "year": 2006
+    },
+    {
+      "id": "c5",
+      "text": "Secondary school students who receive homework practice tend to have higher mathematics achievement.",
+      "doc_id": "edu_a",
+      "chunk_id": "edu_a:0:0",
+      "year": 2006
+    },
+    {
+      "id": "c6",
+      "text": "Family support may influence students' mathematics achievement.",
+      "doc_id": "edu_a",
+      "chunk_id": "edu_a:0:0",
+      "year": 2006
+    },
+    {
+      "id": "c7",
+      "text": "The observational design cannot determine the exact cause of the relationship between homework practice and mathematics achievement.",
+      "doc_id": "edu_a",
+      "chunk_id": "edu_a:0:0",
+      "year": 2006
+    }
+  ],
+  "edges": [
+    {
+      "source": "c0",
+      "target": "c3",
+      "label": "contradicts",
+      "cda7": "methodological"
+    },
+    {
+      "source": "c0",
+      "target": "c5",
+      "label": "contradicts",
+      "cda7": "methodological"
+    },
+    {
+      "source": "c0",
+      "target": "c6",
+      "label": "supports",
+      "cda7": null
+    },
+    {
+      "source": "c0",
+      "target": "c7",
+      "label": "contradicts",
+      "cda7": "methodological"
+    },
+    {
+      "source": "c1",
+      "target": "c6",
+      "label": "supports",
+      "cda7": null
+    },
+    {
+      "source": "c2",
+      "target": "c3",
+      "label": "contradicts",
+      "cda7": "methodological"
+    },
+    {
+      "source": "c2",
+      "target": "c5",
+      "label": "contradicts",
+      "cda7": "methodological"
+    },
+    {
+      "source": "c2",
+      "target": "c6",
+      "label": "supports",
+      "cda7": null
+    },
+    {
+      "source": "c2",
+      "target": "c7",
+      "label": "contradicts",
+      "cda7": "methodological"
+    }
+  ],
+  "temporal_curve": {
+    "2006": [
+      5,
+      6
+    ],
+    "2015": [
+      3,
+      6
+    ]
+  },
+  "retrieved_chunks": [
+    {
+      "id": "edu_b:0:0",
+      "title": "Homework evidence B",
+      "year": 2015,
+      "section": "body",
+      "text": "In primary school, more homework does not consistently improve achievement. Heavy assignments can reduce sleep and family time."
+    },
+    {
+      "id": "edu_a:0:0",
+      "title": "Homework evidence A",
+      "year": 2006,
+      "section": "body",
+      "text": "In secondary school, homework practice is associated with higher achievement in mathematics. The observational design cannot rule out family support as a confounder."
+    }
+  ]
+}

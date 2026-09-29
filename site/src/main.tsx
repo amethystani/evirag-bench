@@ -235,6 +235,7 @@ function App() {
             },
             { type: 'link', label: 'Learn', href: '#problem' },
             { type: 'link', label: 'Runs', href: '#runs' },
+            { type: 'link', label: 'Explorer', href: 'explorer/' },
             { type: 'link', label: 'Demo', href: 'demo/' }
           ],
           afterLogo: [

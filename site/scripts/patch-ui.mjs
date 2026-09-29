@@ -34,6 +34,8 @@ const edits = {
   ],
   'hermes-landing/sections/landing-features.js': [['{ children: "Preview" }', '{ children: "Overview" }']],
   'components/poster/index.js': [['children: "Hermes Agent"', 'children: "Evirag"']],
+  'hermes-portal/components/portal-sidebar-header.js': [['"Nous",', '"Evirag",'], ['"Portal"', '"Explorer"']],
+  'hermes-portal/hermes-portal-sidebar.js': [['"Nous Portal navigation"', '"Run explorer navigation"']],
   'components/badges/nous-girl.js': [['return /* @__PURE__ */ jsx("img"', 'return null; /* @__PURE__ */ jsx("img"']]
 }
 

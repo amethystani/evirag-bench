@@ -193,3 +193,7 @@ body { margin: 0; background: #0000f2; overflow-x: clip; }
 .fit-wordmark { display: block; width: 100%; text-align: center; text-transform: uppercase; font-family: var(--font-display); font-weight: 300; line-height: .9; letter-spacing: .01em; margin: 0; white-space: nowrap; }
 .modal-code { max-height: 60vh; overflow: auto; background: #0a0a3d; color: #e8edff; }
 @media (max-width: 768px) { .bar-row2 { grid-template-columns: 6rem 1fr 3rem; } }
+
+/* ---- run explorer ---- */
+.explorer-page { padding: clamp(20px, 3vw, 48px); max-width: 78rem; }
+.explorer-page .hw-mono { text-transform: none; }
