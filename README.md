@@ -133,7 +133,7 @@ For a quick sanity check of the core mechanism, `scripts/preliminary_check.sh` r
 
 ---
 
-<sub>Banner artwork: Nicholas Roerich, Toshio Ebine and @khvostart, among others. All rights remain with their creators.</sub>
+<sub>Site built with [@nous-research/ui](https://www.npmjs.com/package/@nous-research/ui) (MIT). Banner artwork: Nicholas Roerich, Toshio Ebine and @khvostart, among others. All rights remain with their creators.</sub>
 
 ## Citation
 

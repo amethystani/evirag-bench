@@ -1,0 +1,14 @@
+@import 'tailwindcss';
+@import '@nous-research/ui/styles/fonts.css';
+@import '@nous-research/ui/styles/globals.css';
+@import '@nous-research/ui/styles/hermes-landing.css';
+
+:root {
+  --font-display: 'Antonio', 'Arial Narrow', sans-serif;
+  --font-sigurd: 'Antonio', 'Arial Narrow', sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-ui: 'Inter', system-ui, sans-serif;
+  --font-mono: 'Courier Prime', ui-monospace, monospace;
+}
+html { scroll-behavior: auto; }
+body { margin: 0; background: #0000f2; }

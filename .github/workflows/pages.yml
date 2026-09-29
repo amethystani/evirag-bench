@@ -20,16 +20,19 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: Assemble site
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - name: Build site
+        working-directory: site
         run: |
-          mkdir -p _site/assets
-          cp docs/site/index.html _site/
-          cp examples/smoke_run.json _site/demo.json
-          cp docs/assets/*.jpg docs/assets/*.png _site/assets/
-          cp paper/paper.pdf _site/paper.pdf
+          npm ci
+          npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v5
         with:
-          path: _site
+          path: site/dist
       - id: deployment
         uses: actions/deploy-pages@v5
