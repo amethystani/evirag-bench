@@ -1,12 +1,64 @@
+<p align="center"><img src="docs/assets/hero.jpg" alt="EVIRAG: retrieval that keeps the disagreement" width="100%"></p>
+
 <p align="center">
-  <img src="docs/assets/prism.svg" alt="EVIRAG: one question enters a prism and fans out into distinct, source-linked views" width="100%">
+  <img alt="Rust" src="https://img.shields.io/badge/Rust-2021-b7410e?style=flat-square&logo=rust&logoColor=white">
+  <img alt="Ollama" src="https://img.shields.io/badge/Ollama-local_models-1f3fbf?style=flat-square">
+  <img alt="EMNLP" src="https://img.shields.io/badge/EMNLP-camera--ready-1f3fbf?style=flat-square">
+  <img alt="Benchmark" src="https://img.shields.io/badge/benchmark-1%2C250_queries-6b7fd6?style=flat-square">
 </p>
 
-# EVIRAG Bench
+<p align="center"><b>One question in. Several evidence-backed positions out, each tied to its source passages.</b></p>
 
 EVIRAG preserves disagreement across scientific retrieval and answer generation. The Rust executable provides the seven-stage pipeline, evaluation metrics, corpus tools, and baseline controls. The paper source and PDF are in `paper/`.
 
-## Build
+<p align="center">
+  <a href="#the-pipeline">Pipeline</a> ·
+  <a href="#quickstart">Quickstart</a> ·
+  <a href="#corpus-and-benchmark">Corpus</a> ·
+  <a href="#run">Run</a> ·
+  <a href="#paper">Paper</a>
+</p>
+
+---
+
+<img src="docs/assets/pipeline.jpg" alt="Seven stages, many views" width="100%">
+
+## The pipeline
+
+A standard RAG system collapses conflicting sources into one confident answer. EVIRAG keeps the conflict and explains it.
+
+```text
+question ─► intent ─► role-based retrieval ─► atomic claims ─► pair labels + CDA-7 causes
+                                                                        │
+   source-linked views ◄─ temporal evidence ◄─ signed Louvain partition ◄┘
+```
+
+The full path first classifies the query as resolved or contested. Contested queries use four retrieval roles with budgets 3, 5, 4, and 3. The pipeline extracts atomic claims, labels claim pairs, assigns CDA-7 causes, partitions the signed graph with signed Louvain, tracks dated evidence, and synthesizes source-linked views. Resolved queries use a concise source-grounded answer. The JSONL output also includes a readable answer template. Use `--intent contested` to inspect all seven stages on a specific query.
+
+Every view carries a **position**, an **evidence summary**, **weaknesses**, **disagreement causes**, **passage IDs**, and a **confidence tier**. The response layout is in [`docs/output.md`](docs/output.md).
+
+<details>
+<summary><b>CDA-7: why sources disagree</b></summary>
+
+Every contradiction edge is labeled with one primary cause. The full guide is in [`docs/cda7.md`](docs/cda7.md).
+
+| Cause | Meaning |
+|---|---|
+| Replication | A later attempt repeats the earlier design and fails to recover its finding. |
+| Population | Samples, age groups, settings, or inclusion criteria differ. |
+| Operational | Different definitions or outcome measures for the same named concept. |
+| Methodological | Study design, intervention, protocol, or control strategy differs. |
+| Statistical | Estimates or interpretations of uncertainty differ despite comparable designs. |
+| Temporal | Evidence from a later period differs from evidence from an earlier period. |
+| Theoretical | Competing explanatory frameworks account for the same observations. |
+
+</details>
+
+---
+
+<img src="docs/assets/quickstart.jpg" alt="Build it. Run it." width="100%">
+
+## Quickstart
 
 Install Rust and [Ollama](https://ollama.com/download). Start Ollama in one terminal:
 
@@ -22,6 +74,10 @@ cargo build --release
 ```
 
 The default run uses `qwen3.6:35b-a3b` and `all-minilm`. Use `scripts/fetch_models.sh` to pull both. `cargo test` checks corpus processing, signed Louvain, and scoring without downloading a model.
+
+---
+
+<img src="docs/assets/corpus.jpg" alt="Bring your own corpus" width="100%">
 
 ## Corpus and benchmark
 
@@ -43,6 +99,10 @@ target/release/evirag-bench validate-gold data/gold/pilot.jsonl
 
 Use `--full` for the 1,250-query, five-domain benchmark layout.
 
+---
+
+<img src="docs/assets/run.jpg" alt="Every baseline, one script" width="100%">
+
 ## Run
 
 ```sh
@@ -54,12 +114,22 @@ target/release/evirag-bench evaluate runs/full.jsonl data/gold/benchmark.jsonl r
 
 `scripts/run_all.sh` fetches the configured models and runs full EVIRAG, its two ablations, closed-book, vanilla at 10 and 15 passages, structured-prompt, single-agent, and MMR controls. Set `CORPUS`, `GOLD`, `MODEL`, `EMBED_MODEL`, or `EVI` to override defaults.
 
-The full path first classifies the query as resolved or contested. Contested queries use four retrieval roles with budgets 3, 5, 4, and 3. The pipeline extracts atomic claims, labels claim pairs, assigns CDA-7 causes, partitions the signed graph with signed Louvain, tracks dated evidence, and synthesizes source-linked views. Resolved queries use a concise source-grounded answer. Each contested view contains a position, evidence summary, weaknesses, disagreement causes, passage IDs, and a confidence tier. The JSONL output also includes a readable answer template. Use `--intent contested` to inspect all seven stages on a specific query.
+The full path first classifies the query as resolved or contested. Contested queries use four retrieval roles with budgets 3, 5, 4, and 3. The pipeline extracts atomic claims, labels claim pairs, assigns CDA-7 causes, partitions the signed graph with signed Louvain, tracks dated evidence, and synthesizes source-linked views. Resolved queries use a concise source-grounded answer. The JSONL output also includes a readable answer template. Use `--intent contested` to inspect all seven stages on a specific query.
 
 The response layout is in `docs/output.md`; the disagreement labels are in `docs/cda7.md`.
 
 Evaluation computes embedding viewpoint coverage at 0.65, single-view concentration, contradiction recall, confidence calibration error, retrieval coverage at K, faithfulness against cited passages, bootstrap intervals, and paired Wilcoxon tests with Bonferroni adjustment. See `docs/run-settings.md` for definitions and run settings.
 
+For a quick sanity check of the core mechanism, `scripts/preliminary_check.sh` runs full EVIRAG, vanilla RAG, and the structured-prompt baseline on the homework fixture and reports views, contradiction links, and contradiction recall. It is a smoke-level check, not a substitute for the full benchmark.
+
+---
+
+<img src="docs/assets/paper.jpg" alt="Read the paper" width="100%">
+
 ## Paper
 
 `paper/acl_latex.tex` is the camera-ready source, with its bibliography, figure, ACL style files, and PDF. Run `cd paper && ./build.sh` if `tectonic` is installed.
+
+---
+
+<sub>Banner artwork: Nicholas Roerich and Toshio Ebine, among others. All rights remain with their creators.</sub>
