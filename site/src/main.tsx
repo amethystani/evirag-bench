@@ -40,6 +40,10 @@ import { Metrics } from './sections/Metrics'
 import { Results } from './sections/Results'
 import { Output } from './sections/Output'
 import { Glossary } from './sections/Glossary'
+import { Overlay } from './retro/Overlay'
+import { Marquee } from './retro/Marquee'
+import { Boot } from './retro/Boot'
+import { Timeline } from './retro/Timeline'
 import { createRoot } from 'react-dom/client'
 import './fonts'
 import './styles.css'
@@ -92,8 +96,8 @@ const content: HermesLandingContent = {
     ...base.install,
     label: 'Run locally',
     unixCommand: `cargo install --git ${REPO}`,
-    widthAnchor: `git clone ${REPO} && cd evirag-bench && cargo build --release`,
-    windowsCommand: `git clone ${REPO} && cd evirag-bench && cargo build --release`
+    widthAnchor: `cargo install --git ${REPO}`,
+    windowsCommand: `git clone ${REPO}`
   },
   platforms: [
     { detail: 'macOS and Linux', match: ['Mac'], os: 'mac', title: 'Prebuilt Binary' },
@@ -208,6 +212,7 @@ function App() {
     <HermesLandingShell>
       <HermesLandingScroll />
       <FilmGrain />
+      <Overlay />
       <HermesHeader
         nav={{
           beforeLogo: [
@@ -251,6 +256,8 @@ function App() {
       <HermesLandingHero content={content} downloads={heroDownloads} />
       <HermesLandingShowcase content={content} />
       <Stats />
+      <Marquee items={['Epistemic collapse', 'Claim graph', 'CDA-7', 'Signed Louvain', 'Skeptic agent', 'Source-linked views']} />
+      <Boot />
       <Problem />
       <Example />
       <Pipeline />
@@ -258,6 +265,8 @@ function App() {
       <Cda7 />
       <Graph />
       <Typology />
+      <Timeline />
+      <Marquee reverse items={['989 papers', '43,155 chunks', '63,955 claims', '1,250 queries', 'Five domains', 'Four classes']} />
       <Bench />
       <Metrics />
       <Results />

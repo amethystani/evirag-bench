@@ -1,3 +1,4 @@
+import { Scramble } from '@nous-research/ui'
 import { Reveal } from '../hooks'
 
 export function Chapter({ id, no, title, lead, paper = false, children }: {
@@ -9,8 +10,8 @@ export function Chapter({ id, no, title, lead, paper = false, children }: {
       className={`chapter ${paper ? 'chapter-paper' : ''} px-[var(--hw-gutter)] py-[calc(140*var(--u))] max-md:px-5 max-md:py-20`}
     >
       <Reveal>
-        <p className="hw-mono text-[var(--hw-text-eyebrow)] tracking-[0.12em] uppercase opacity-70 max-md:text-xs">{no}</p>
-        <h2 className="mt-[calc(18*var(--u))] max-w-[calc(1500*var(--u))] text-[calc(120*var(--u))] leading-[0.95] font-light tracking-[0.02em] uppercase max-md:text-5xl">{title}</h2>
+        <p className="hw-mono hud-line text-[var(--hw-text-eyebrow)] tracking-[0.12em] uppercase opacity-70 max-md:text-xs"><span className="hud-dot" />{no}<span className="hud-rule" /></p>
+        <h2 className="mt-[calc(18*var(--u))] max-w-[calc(1500*var(--u))] text-[calc(120*var(--u))] leading-[0.95] font-light tracking-[0.02em] uppercase max-md:text-[2.1rem] max-md:leading-[1.02]"><Scramble>{title}</Scramble></h2>
         {lead && <p className="hw-mono mt-[calc(36*var(--u))] max-w-[calc(1200*var(--u))] text-[calc(26*var(--u))] leading-[1.55] normal-case max-md:text-sm">{lead}</p>}
       </Reveal>
       <div className="mt-[calc(90*var(--u))] max-md:mt-10">{children}</div>

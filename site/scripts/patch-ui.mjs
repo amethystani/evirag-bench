@@ -24,7 +24,8 @@ const edits = {
   ],
   'components/landing-download-button/index.js': [
     ['`Download for ${platform.title}`', '"Download source code"'],
-    ['linux ? "Install via terminal"', 'linux ? "Run locally"']
+    ['linux ? "Install via terminal"', 'linux ? "Run locally"'],
+    ['platform ? OS_ICON[platform.os] : DownloadIcon', 'DownloadIcon']
   ],
   'components/platform-card/index.js': [['installLabel = "Install via terminal"', 'installLabel = "Run locally"']],
   'components/install-command/index.js': [

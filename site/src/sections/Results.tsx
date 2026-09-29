@@ -1,5 +1,6 @@
 import { Reveal, useInView } from '../hooks'
 import { Chapter, Note } from './parts'
+import { Radar } from '../retro/Radar'
 
 const ROWS: [string, number, number, number, string][] = [
   ['Closed-book, no retrieval', 0.392, 0.214, 1, '#9aa7d6'],
@@ -41,6 +42,8 @@ export function Results() {
         </div>
         {ROWS.map(([l, vc, cr, calls, c], i) => <Row key={l} label={l} vc={vc} cr={cr} calls={calls} color={c} i={i} />)}
       </div>
+
+      <div className="mt-[calc(70*var(--u))] max-md:mt-10"><Radar /></div>
 
       <div className="mt-[calc(90*var(--u))] grid gap-5 md:grid-cols-3 max-md:mt-10">
         {[

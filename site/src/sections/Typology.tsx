@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Chapter, Note } from './parts'
+import { Gauge } from '../retro/Gauge'
 
 const CLASSES = [
   { id: 'resolved', name: 'Resolved', rule: 'ED < 0.15, PI < 0.3', conf: 'high', queries: 190, text: 'Sources largely agree. A short, source-grounded answer is enough.', x: 0, w: 0.15, y: 0, h: 0.3, c: '#9df0b5' },
@@ -45,6 +46,7 @@ export function Typology() {
           <p className="hw-mono mt-2 text-[calc(22*var(--u))] uppercase max-md:text-xs">Benchmark queries: <b>{cur.queries}</b></p>
         </div>
       </div>
+      <div className="mt-[calc(70*var(--u))] max-md:mt-10"><Gauge /></div>
       <Note>Thresholds were chosen by inspecting a 25-query pilot and checked for stability under ±0.05 perturbation. The class is what sets how confidently an answer is presented.</Note>
     </Chapter>
   )

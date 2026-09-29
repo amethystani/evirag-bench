@@ -1,5 +1,6 @@
 import { useInView } from '../hooks'
 import { Chapter, Note } from './parts'
+import { Scope } from '../retro/Scope'
 
 const VIEWS = [
   { id: 'V1', x: 90, y: 60, label: 'Helps', c: '#edff45' },
@@ -62,6 +63,8 @@ export function Problem() {
           <p className="hw-mono mt-4 text-[calc(22*var(--u))] normal-case max-md:text-xs">Each position stays a separate view, with its own evidence, weaknesses, sources and confidence.</p>
         </div>
       </div>
+
+      <div className="mt-[calc(70*var(--u))] max-md:mt-10"><Scope /></div>
 
       <div className="mt-[calc(110*var(--u))] grid gap-[calc(50*var(--u))] md:grid-cols-3 max-md:mt-14 max-md:gap-8">
         {[
