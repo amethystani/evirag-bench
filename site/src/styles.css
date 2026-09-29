@@ -4,10 +4,10 @@
 @import '@nous-research/ui/styles/hermes-landing.css';
 
 :root {
-  --font-display: 'Antonio', 'Arial Narrow', sans-serif;
-  --font-sigurd: 'Antonio', 'Arial Narrow', sans-serif;
-  --font-body: 'Inter', system-ui, sans-serif;
-  --font-ui: 'Inter', system-ui, sans-serif;
+  --font-display: 'Sigurd Variable', 'Antonio', 'Arial Narrow', sans-serif;
+  --font-sigurd: 'Sigurd Variable', 'Antonio', 'Arial Narrow', sans-serif;
+  --font-body: 'Rules Variable', 'Inter', system-ui, sans-serif;
+  --font-ui: 'Rules Variable', 'Inter', system-ui, sans-serif;
   --font-mono: 'Courier Prime', ui-monospace, monospace;
 }
 html { scroll-behavior: auto; }

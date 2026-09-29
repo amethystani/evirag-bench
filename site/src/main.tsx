@@ -27,6 +27,7 @@ import { UbuntuIcon } from '@nous-research/ui/ui/components/icons/ubuntu'
 import { WindowsIcon } from '@nous-research/ui/ui/components/icons/windows'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import './fonts'
 import './styles.css'
 
 const REPO = 'https://github.com/amethystani/evirag-bench'
