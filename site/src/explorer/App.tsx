@@ -1,11 +1,13 @@
 import { Badge, BottomSheet, Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Input, ListItem, Segmented, Switch, useBelowBreakpoint } from '@nous-research/ui'
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import { chunks, claims, contradictions, meta, REPO, views } from './data'
+import { Chat, makeMessage, newConversation, type Conversation } from './Chat'
 import { Claims, docsIndex, Docs, Graph, Metrics, Overview, PageTitle, Passages, Time, Views } from './pages'
 
 type Theme = 'signal' | 'ink' | 'sand'
+const CHAT_ITEM = { path: '/chat', label: 'Chat', key: '0', icon: '✦' }
 const NAV: { group: string; items: { path: string; label: string; key: string; icon: string }[] }[] = [
-  { group: 'Run', items: [
+  { group: 'Saved run', items: [
     { path: '/overview', label: 'Overview', key: '1', icon: '◈' },
     { path: '/views', label: 'Views', key: '2', icon: '▤' },
     { path: '/claims', label: 'Claims', key: '3', icon: '❞' },
@@ -19,11 +21,11 @@ const NAV: { group: string; items: { path: string; label: string; key: string; i
   ] },
   { group: 'App', items: [{ path: '/settings', label: 'Settings', key: '9', icon: '⚙' }] }
 ]
-const FLAT = NAV.flatMap((g) => g.items)
+const FLAT = [CHAT_ITEM, ...NAV.flatMap((g) => g.items)]
 
 // hash router
 const subscribe = (cb: () => void) => { addEventListener('hashchange', cb); return () => removeEventListener('hashchange', cb) }
-const getPath = () => location.hash.replace(/^#/, '') || '/overview'
+const getPath = () => location.hash.replace(/^#/, '') || '/chat'
 function useRoute() {
   const path = useSyncExternalStore(subscribe, getPath)
   const go = useCallback((p: string) => { location.hash = p }, [])
@@ -114,6 +116,32 @@ export function App() {
   const [drawer, setDrawer] = useState(false)
   const [search, setSearch] = useState(false)
   const mobile = useBelowBreakpoint(1024)
+  const [chats, setChats] = useState<Conversation[]>(() => {
+    try { const raw = localStorage.getItem('ex-chats'); if (raw) { const parsed = JSON.parse(raw) as Conversation[]; if (parsed.length) return parsed } } catch { /* storage unavailable */ }
+    return [newConversation()]
+  })
+  const [activeId, setActiveId] = useState<string>(() => chats[0].id)
+  useEffect(() => { try { localStorage.setItem('ex-chats', JSON.stringify(chats.slice(0, 30))) } catch { /* storage unavailable */ } }, [chats])
+  const active = chats.find((c) => c.id === activeId) ?? chats[0]
+  const startChat = () => {
+    const blank = chats.find((c) => c.messages.length === 0)
+    if (blank) { setActiveId(blank.id) } else { const c = newConversation(); setChats([c, ...chats]); setActiveId(c.id) }
+    go('/chat')
+  }
+  const removeChat = (id: string) => {
+    const rest = chats.filter((c) => c.id !== id)
+    const next = rest.length ? rest : [newConversation()]
+    setChats(next)
+    if (id === activeId) setActiveId(next[0].id)
+  }
+  const sendMessage = (text: string) => {
+    const u = makeMessage('user', text)
+    setChats((all) => all.map((c) => c.id === active.id ? { ...c, title: c.messages.length === 0 ? text.slice(0, 48) : c.title, messages: [...c.messages, u] } : c))
+    setTimeout(() => {
+      const a = makeMessage('assistant', 'Thanks for the question.', 'soon')
+      setChats((all) => all.map((c) => c.id === active.id ? { ...c, messages: [...c.messages, a] } : c))
+    }, 900)
+  }
 
   useEffect(() => { document.documentElement.dataset.theme = theme }, [theme])
   useEffect(() => { document.documentElement.dataset.dense = String(dense); document.documentElement.dataset.reduce = String(reduce) }, [dense, reduce])
@@ -131,6 +159,7 @@ export function App() {
   }, [collapsed, go, setCollapsed])
 
   const current = FLAT.find((n) => path.startsWith(n.path)) ?? FLAT[0]
+  const isChat = current.path === '/chat'
   const page = (() => {
     switch (current.path) {
       case '/views': return <Views />
@@ -141,7 +170,8 @@ export function App() {
       case '/metrics': return <Metrics />
       case '/docs': return <Docs />
       case '/settings': return <Settings theme={theme} setTheme={setTheme} dense={dense} setDense={setDense} reduce={reduce} setReduce={setReduce} />
-      default: return <Overview go={go} />
+      case '/overview': return <Overview go={go} />
+      default: return null
     }
   })()
 
@@ -152,6 +182,20 @@ export function App() {
         <span className="ex-logo">EVIRAG</span>
         {!showRail && <span className="ex-sub">Run explorer</span>}
       </div>
+      <button className="ex-newchat" onClick={startChat} title="New chat">
+        <span aria-hidden>＋</span>{!showRail && <span>New chat</span>}
+      </button>
+      {!showRail && (
+        <div className="ex-history">
+          <p className="ex-group-label">Recent</p>
+          {chats.map((c) => (
+            <div key={c.id} className={`ex-hist ${c.id === active.id && current.path === '/chat' ? 'ex-hist-on' : ''}`}>
+              <button onClick={() => { setActiveId(c.id); go('/chat') }} title={c.title}>{c.title}</button>
+              <button className="ex-hist-x" onClick={() => removeChat(c.id)} aria-label={`Delete ${c.title}`}>×</button>
+            </div>
+          ))}
+        </div>
+      )}
       <nav>
         {NAV.map((g) => (
           <div key={g.group} className="ex-group">
@@ -193,7 +237,11 @@ export function App() {
             <Segmented aria-label="Theme" size="sm" value={theme} onChange={setTheme} options={[{ label: 'Signal', value: 'signal' }, { label: 'Ink', value: 'ink' }, { label: 'Sand', value: 'sand' }]} />
           </div>
         </header>
-        <main className="ex-content" key={current.path}><div className="ex-page surface-white" data-surface="white">{page}</div></main>
+        {isChat ? (
+          <main className="ex-chatmain" key={active.id}><Chat conv={active} onSend={sendMessage} /></main>
+        ) : (
+          <main className="ex-content" key={current.path}><div className="ex-page surface-white" data-surface="white">{page}</div></main>
+        )}
       </div>
       <Palette open={search} onClose={() => setSearch(false)} go={go} />
     </div>
