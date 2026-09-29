@@ -40,7 +40,7 @@ export function Statement({ text, accent = [], sub }: { text: string; accent?: s
     let w = 0, h = 0
     const resize = () => {
       const r = cv.getBoundingClientRect()
-      const d = Math.min(2, devicePixelRatio || 1)
+      const d = Math.min(1.5, devicePixelRatio || 1)
       w = r.width; h = r.height
       cv.width = w * d; cv.height = h * d
       ctx.setTransform(d, 0, 0, d, 0, 0)

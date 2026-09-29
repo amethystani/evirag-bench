@@ -17,7 +17,7 @@ export function Scope() {
     io.observe(canvas)
     const resize = () => {
       const r = canvas.getBoundingClientRect()
-      const d = Math.min(2, devicePixelRatio || 1)
+      const d = Math.min(1.5, devicePixelRatio || 1)
       canvas.width = r.width * d
       canvas.height = r.height * d
       ctx.setTransform(d, 0, 0, d, 0, 0)

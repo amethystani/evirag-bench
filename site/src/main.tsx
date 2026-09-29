@@ -43,7 +43,7 @@ import { Glossary } from './sections/Glossary'
 import { Overlay } from './retro/Overlay'
 import { Statement } from './retro/Statement'
 import { enableTilt } from './retro/tilt'
-import { Boot } from './retro/Boot'
+import { MacTerminal } from './retro/MacTerminal'
 import { Timeline } from './retro/Timeline'
 import { createRoot } from 'react-dom/client'
 import './fonts'
@@ -258,7 +258,7 @@ function App() {
       <HermesLandingShowcase content={content} />
       <Stats />
       <Statement text="Not every question has one answer. Some have three, and they disagree for reasons that matter." accent={['three,','disagree','matter']} sub="So keep the disagreement." />
-      <Boot />
+      <MacTerminal />
       <Problem />
       <Example />
       <Pipeline />
