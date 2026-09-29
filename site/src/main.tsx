@@ -5,6 +5,7 @@ import {
   AccordionTrigger,
   Button,
   createHermesLandingContent,
+  FilmGrain,
   createHermesPricingContent,
   HermesHeader,
   HermesLandingFeatures,
@@ -118,6 +119,7 @@ function App() {
   return (
     <HermesLandingShell>
       <HermesLandingScroll />
+      <FilmGrain />
       <HermesHeader
         nav={{
           beforeLogo: [
