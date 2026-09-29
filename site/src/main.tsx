@@ -18,6 +18,13 @@ import {
   PricingTiers
 } from '@nous-research/ui'
 import type { HermesLandingContent, HermesLandingDownloads, HermesPricingContent } from '@nous-research/ui'
+import { AppleIcon } from '@nous-research/ui/ui/components/icons/apple'
+import { AppWindowIcon } from '@nous-research/ui/ui/components/icons/app-window'
+import { DownloadIcon } from '@nous-research/ui/ui/components/icons/download'
+import { LoginIcon } from '@nous-research/ui/ui/components/icons/login'
+import { TerminalIcon } from '@nous-research/ui/ui/components/icons/terminal'
+import { UbuntuIcon } from '@nous-research/ui/ui/components/icons/ubuntu'
+import { WindowsIcon } from '@nous-research/ui/ui/components/icons/windows'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles.css'
@@ -120,6 +127,35 @@ const faqs = [
   ['Is the benchmark result available?', 'Not yet. The repository ships the pipeline, metrics and a smoke fixture. A full 1,250-query run is tracked as an open issue.']
 ]
 
+const footerColumns: [string, [string, string][]][] = [
+  ['Project', [['Repository', REPO], ['Releases', `${REPO}/releases`], ['Changelog', `${REPO}/blob/main/CHANGELOG.md`], ['Issues', `${REPO}/issues`]]],
+  ['Run', [['Quickstart', `${REPO}#ii-quickstart`], ['Smoke test', `${REPO}/blob/main/scripts/smoke.sh`], ['Output format', `${REPO}/blob/main/docs/output.md`], ['CDA-7 guide', `${REPO}/blob/main/docs/cda7.md`]]],
+  ['Benchmark', [['Annotation guide', `${REPO}/blob/main/docs/annotation.md`], ['Run settings', `${REPO}/blob/main/docs/run-settings.md`], ['Gold schema', `${REPO}/blob/main/data/schema.example.json`]]],
+  ['Paper', [['Read the PDF', `${REPO}/blob/main/paper/paper.pdf`], ['Cite', `${REPO}/blob/main/CITATION.cff`], ['Contribute', `${REPO}/blob/main/CONTRIBUTING.md`]]]
+]
+
+function SiteFooter() {
+  return (
+    <footer className="bg-white px-[var(--hw-gutter)] py-[calc(90*var(--u))] text-[var(--hw-bg)]">
+      <div className="grid grid-cols-2 gap-[calc(60*var(--u))] md:grid-cols-4">
+        {footerColumns.map(([title, links]) => (
+          <div key={title} className="flex flex-col gap-[calc(20*var(--u))]">
+            <h3 className="text-[calc(48*var(--u))] leading-none font-light tracking-[0.03em] uppercase max-md:text-3xl">{title}</h3>
+            <ul className="hw-mono flex flex-col gap-[calc(10*var(--u))] text-[var(--hw-text-body)] uppercase max-md:text-xs">
+              {links.map(([label, href]) => (
+                <li key={label}><a href={href} rel="noopener noreferrer" target="_blank">{label}</a></li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+      <p className="hw-mono mt-[calc(90*var(--u))] text-[var(--hw-text-body)] uppercase max-md:text-xs">
+        Evirag Bench &bull; MIT License &bull; 2026
+      </p>
+    </footer>
+  )
+}
+
 function Section({ children }: { children: React.ReactNode }) {
   return <div className="px-[var(--hw-gutter)] pt-[calc(60*var(--u))]">{children}</div>
 }
@@ -132,12 +168,39 @@ function App() {
       <HermesHeader
         nav={{
           beforeLogo: [
-            { type: 'link', label: 'Install', href: '#install' },
+            {
+              type: 'dropdown',
+              hierarchy: 'secondary',
+              label: 'Install',
+              prefix: <DownloadIcon className="!size-[18px] shrink-0" />,
+              items: [
+                { href: '#downloads', icon: <AppleIcon aria-hidden className="size-6" />, label: 'macOS' },
+                { href: '#downloads', icon: <WindowsIcon aria-hidden className="size-6" />, label: 'Windows' },
+                { href: '#install', icon: <UbuntuIcon aria-hidden className="size-6" />, label: 'Install via terminal' }
+              ]
+            },
+            { type: 'link', label: 'Runs', href: '#runs' },
             { type: 'link', label: 'Demo', href: 'demo/' }
           ],
           afterLogo: [
             { type: 'link', label: 'Docs', href: `${REPO}/tree/main/docs` },
-            { type: 'link', label: 'Paper', href: `${REPO}/blob/main/paper/paper.pdf` }
+            {
+              type: 'dropdown',
+              hierarchy: 'ghost',
+              label: 'Project',
+              items: [
+                { external: true, href: REPO, icon: <AppWindowIcon aria-hidden className="size-6" />, label: 'Repository' },
+                { external: true, href: `${REPO}/releases`, icon: <DownloadIcon aria-hidden className="size-6" />, label: 'Releases' },
+                { external: true, href: `${REPO}/issues`, icon: <TerminalIcon aria-hidden className="size-6" />, label: 'Issues' }
+              ]
+            },
+            {
+              type: 'link',
+              label: 'Paper',
+              href: `${REPO}/blob/main/paper/paper.pdf`,
+              icon: <LoginIcon className="!h-5 !w-[1.125rem] shrink-0" />,
+              mobilePresentation: 'icon'
+            }
           ]
         } as never}
       />
@@ -167,8 +230,9 @@ function App() {
           ))}
         </Accordion>
       </section>
-      <PricingTiers content={pricing} />
+      <div id="runs"><PricingTiers content={pricing} /></div>
       <HermesLandingPortalFooter content={content} version="Evirag Bench v0.1.0" />
+      <SiteFooter />
     </HermesLandingShell>
   )
 }
