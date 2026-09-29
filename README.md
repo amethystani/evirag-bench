@@ -18,9 +18,8 @@ EVIRAG preserves disagreement across scientific retrieval and answer generation.
 
 ---
 
+<a id="i-pipeline"></a>
 <img src="docs/assets/pipeline.jpg" alt="Pipeline" width="100%">
-
-## I. Pipeline
 
 ```text
 question ─► intent ─► role-based retrieval ─► atomic claims ─► pair labels + CDA-7 causes
@@ -51,9 +50,8 @@ Every contradiction edge is labeled with one primary cause. The full guide is in
 
 ---
 
+<a id="ii-quickstart"></a>
 <img src="docs/assets/quickstart.jpg" alt="Quickstart" width="100%">
-
-## II. Quickstart
 
 Install Rust and [Ollama](https://ollama.com/download). Start Ollama in one terminal:
 
@@ -72,9 +70,8 @@ The default run uses `qwen3.6:35b-a3b` and `all-minilm`. Use `scripts/fetch_mode
 
 ---
 
+<a id="iii-corpus-and-benchmark"></a>
 <img src="docs/assets/corpus.jpg" alt="Corpus and benchmark" width="100%">
-
-## III. Corpus and benchmark
 
 Documents are JSON Lines with `id`, `title`, `text`, optional `year`, `venue`, `domain`, `doi`, and `sections`. Each section has a `heading` and `text`. The chunker uses the pinned MiniLM tokenizer to make 256-token passages with overlap 32 within section boundaries. Document and chunk IDs keep claims linked to passages. The tokenizer is downloaded once into `data/tokenizer.json`.
 
@@ -96,9 +93,8 @@ Use `--full` for the 1,250-query, five-domain benchmark layout.
 
 ---
 
+<a id="iv-run"></a>
 <img src="docs/assets/run.jpg" alt="Run" width="100%">
-
-## IV. Run
 
 ```sh
 target/release/evirag-bench chunk data/corpus/documents.jsonl data/corpus/chunks.jsonl
@@ -119,9 +115,8 @@ For a quick sanity check of the core mechanism, `scripts/preliminary_check.sh` r
 
 ---
 
+<a id="v-paper"></a>
 <img src="docs/assets/paper.jpg" alt="Paper" width="100%">
-
-## V. Paper
 
 `paper/acl_latex.tex` is the camera-ready source, with its bibliography, figure, ACL style files, and PDF. Run `cd paper && ./build.sh` if `tectonic` is installed.
 
