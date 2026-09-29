@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/prism.svg" alt="EVIRAG: one question enters a prism and fans out into distinct, source-linked views" width="100%">
+</p>
+
 # EVIRAG Bench
 
 EVIRAG preserves disagreement across scientific retrieval and answer generation. The Rust executable provides the seven-stage pipeline, evaluation metrics, corpus tools, and baseline controls. The paper source and PDF are in `paper/`.
