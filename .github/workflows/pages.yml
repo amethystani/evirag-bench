@@ -28,7 +28,7 @@ jobs:
           cp docs/assets/*.jpg docs/assets/*.png _site/assets/
           cp paper/paper.pdf _site/paper.pdf
       - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: _site
       - id: deployment
