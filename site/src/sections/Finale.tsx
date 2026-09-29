@@ -53,6 +53,24 @@ const BIBTEX = `@inproceedings{mishra2026evirag,
 
 type Cite = 'menu' | 'bibtex' | 'cff' | 'pdf'
 
+/** The poster renders at a fixed large size, so scale it to whatever width its column has. */
+function ScaledPoster() {
+  const box = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState(0.5)
+  useEffect(() => {
+    const el = box.current
+    if (!el) return
+    const ro = new ResizeObserver(() => setScale(Math.max(0.15, el.clientWidth / 1080)))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  return (
+    <div ref={box} className="poster-box">
+      <Poster variant="vibe" aspect="landscape" autoPlay="gentle" signature="Evirag" cornerMarks border scale={scale} />
+    </div>
+  )
+}
+
 export function Finale() {
   const tier = useGpuTier()
   const { toast, showToast } = useToast(2400)
@@ -67,10 +85,10 @@ export function Finale() {
   return (
     <section id="finale" className="finale px-[var(--hw-gutter)] pt-[calc(120*var(--u))] pb-[calc(60*var(--u))] max-md:px-5 max-md:pt-16">
       <Reveal>
-        <div className="grid items-center gap-[calc(70*var(--u))] md:grid-cols-[1fr_1.1fr] max-md:gap-8">
+        <div className="finale-grid grid items-center gap-[calc(70*var(--u))] md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] max-md:grid-cols-[minmax(0,1fr)] max-md:gap-8">
           <div className="poster-wrap">
             {tier >= 2 ? (
-              <Poster variant="vibe" aspect="landscape" autoPlay="gentle" signature="Evirag" cornerMarks border />
+              <ScaledPoster />
             ) : (
               <div className="poster-static"><span className="hw-mono">Evirag</span></div>
             )}

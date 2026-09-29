@@ -22,6 +22,9 @@ export function useOnDevice() {
     try {
       const { loadEngine } = await import('./llm')
       engine.current = await loadEngine(model.current, (f, t) => { setProgress(f); setNote(t) })
+      setNote('Loading the search and comparison models')
+      const [{ embed }, { warmNli }] = await Promise.all([import('./retrieve'), import('./nli')])
+      await Promise.all([embed(['warm up']), warmNli()])
       setCached(true)
       setPhase('ready')
     } catch (e) {

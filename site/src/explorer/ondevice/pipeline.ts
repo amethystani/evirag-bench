@@ -2,6 +2,7 @@ import type { WebWorkerMLCEngine } from '@mlc-ai/web-llm'
 import type { Claim, Edge, RunData, View } from '../data'
 import { dot, embed, retrieve } from './retrieve'
 import { generate } from './llm'
+import { judge } from './nli'
 
 export type Progress = (stage: string) => void
 export { Cancelled } from './config'
@@ -10,26 +11,31 @@ import { Cancelled } from './config'
 const CAUSES = ['replication', 'population', 'operational', 'methodological', 'statistical', 'temporal', 'theoretical']
 const clean = (s: string) => s.replace(/^[\s\-*\d.)]+/, '').replace(/\s+/g, ' ').trim()
 
-async function extractClaims(engine: WebWorkerMLCEngine, question: string, text: string) {
-  const out = await generate(
-    engine,
-    'You extract factual claims from scientific abstracts. Be literal. Do not add anything the abstract does not say.',
-    `Abstract:\n${text.slice(0, 1400)}\n\nQuestion of interest: ${question}\n\nList 2 or 3 short, standalone factual claims from this abstract that bear on the question. One claim per line, no numbering, no extra text.`,
-    140
-  )
-  return out.split('\n').map(clean).filter((c) => c.length >= 25 && c.length <= 260).slice(0, 3)
+const CUE = /\b(found|find|show|shows|showed|result|results|associated|effect|effects|significant|significantly|conclude|concluded|suggest|suggests|indicate|indicates|increase|decrease|improve|improves|reduce|reduces|no evidence|positive|negative)\b/i
+const BACKGROUND = /\b(has been|have been|is an important|extensively|in recent years|previous (research|studies)|the (aim|purpose|goal) of|this (study|paper|article) (aims|examines|investigates|explores|analy[sz]es)|we (examine|investigate|explore|analy[sz]e))\b/i
+const METHOD = /\b(participants were|we used|sample of|questionnaire|were recruited|data (were|was) collected)\b/i
+const CONTENT_STOP = new Set('this that with from were have been which their there these those also more than into about between within study studies paper article research authors using used based'.split(' '))
+const contentWords = (t: string) => (t.toLowerCase().match(/[a-z]{4,}/g) ?? []).filter((w) => !CONTENT_STOP.has(w))
+const stem = (w: string) => w.replace(/(ing|ed|es|s)$/, '')
+
+/** Claims are quoted sentences from the abstract, chosen by relevance to the question, so they cannot be invented. */
+async function extractClaims(question: string, qv: Float32Array, text: string) {
+  const sentences = (text.match(/[^.!?]+[.!?]+/g) ?? [text]).map((x) => x.trim()).filter((x) => x.length >= 40 && x.length <= 300)
+  if (!sentences.length) return []
+  const vecs = await embed(sentences)
+  return sentences
+    .map((sent, i) => ({ sent, score: dot(qv, vecs[i] as Float32Array) + (CUE.test(sent) ? 0.1 : 0) - (BACKGROUND.test(sent) ? 0.15 : 0) - (METHOD.test(sent) ? 0.06 : 0) }))
+    .sort((x, y) => y.score - x.score)
+    .slice(0, 2)
+    .map((x) => x.sent)
 }
 
-async function labelPair(engine: WebWorkerMLCEngine, a: string, b: string): Promise<'supports' | 'contradicts' | 'neutral'> {
-  const out = (await generate(
-    engine,
-    'You compare two claims from different scientific papers.',
-    `Claim A: ${a}\nClaim B: ${b}\n\nDo these claims agree with each other, disagree with each other, or are they unrelated? Answer with exactly one word: agree, disagree, or unrelated.`,
-    4
-  )).toLowerCase()
-  if (out.includes('disagree') || out.includes('contradict')) return 'contradicts'
-  if (out.includes('agree') || out.includes('support')) return 'supports'
-  return 'neutral'
+/** True if most of a sentence's content words come from the given source claims (guards against invented wording). */
+function grounded(sentence: string, sources: string[]) {
+  const have = new Set(sources.flatMap(contentWords).map(stem))
+  const words = contentWords(sentence).map(stem)
+  if (words.length < 3) return false
+  return words.filter((w) => have.has(w)).length / words.length >= 0.6
 }
 
 async function labelCause(engine: WebWorkerMLCEngine, a: string, b: string): Promise<string | null> {
@@ -48,7 +54,7 @@ function cluster(claims: Claim[], vecs: Float32Array[], edges: Edge[]) {
   const conflicts = (x: number[], y: number[]) => edges.some((e) => e.label === 'contradicts' && ((x.includes(idx.get(e.source)!) && y.includes(idx.get(e.target)!)) || (y.includes(idx.get(e.source)!) && x.includes(idx.get(e.target)!))))
   const sim = (x: number[], y: number[]) => { let s = 0; for (const i of x) for (const j of y) s += dot(vecs[i], vecs[j] as Float32Array); return s / (x.length * y.length) }
   for (;;) {
-    let bi = -1, bj = -1, bs = 0.55
+    let bi = -1, bj = -1, bs = 0.6
     for (let i = 0; i < groups.length; i++) for (let j = i + 1; j < groups.length; j++) {
       const s = sim(groups[i], groups[j])
       if (s > bs && !conflicts(groups[i], groups[j])) { bs = s; bi = i; bj = j }
@@ -69,15 +75,16 @@ export async function runPipeline(engine: WebWorkerMLCEngine, question: string, 
   if (!r.chunks) return { notCovered: true, best: r.best }
   const chunks = r.chunks
 
-  // claims
+  // claims: quoted sentences, chosen by relevance to the question
   const claims: Claim[] = []
+  const [qv] = await embed([question])
   for (let i = 0; i < chunks.length; i++) {
-    onStage(`Extracting claims ${i + 1} of ${chunks.length}`)
-    const found = await extractClaims(engine, question, chunks[i].text)
+    onStage(`Reading passage ${i + 1} of ${chunks.length}`)
+    const found = await extractClaims(question, qv, chunks[i].text)
     stop()
     for (const text of found) claims.push({ id: `c${claims.length}`, text, doc_id: chunks[i].id.split(':')[0], chunk_id: chunks[i].id, year: chunks[i].year })
   }
-  if (claims.length < 2) throw new Error('The model did not produce enough claims from the retrieved passages.')
+  if (claims.length < 2) throw new Error('Not enough usable sentences were found in the retrieved passages.')
 
   // candidate pairs across different documents
   onStage('Finding claims worth comparing')
@@ -86,16 +93,16 @@ export async function runPipeline(engine: WebWorkerMLCEngine, question: string, 
   for (let i = 0; i < claims.length; i++) for (let j = i + 1; j < claims.length; j++) {
     if (claims[i].doc_id === claims[j].doc_id) continue
     const s = dot(cv[i], cv[j] as Float32Array)
-    if (s >= 0.4) pairs.push({ i, j, s })
+    if (s >= 0.32) pairs.push({ i, j, s })
   }
   pairs.sort((a, b) => b.s - a.s)
-  const top = pairs.slice(0, 12)
+  const top = pairs.slice(0, 24)
 
   const edges: Edge[] = []
   for (let k = 0; k < top.length; k++) {
     onStage(`Comparing claims ${k + 1} of ${top.length}`)
     const { i, j } = top[k]
-    const label = await labelPair(engine, claims[i].text, claims[j].text)
+    const label = await judge(claims[i].text, claims[j].text)
     stop()
     if (label === 'neutral') continue
     let cda7: string | null = null
@@ -121,15 +128,18 @@ export async function runPipeline(engine: WebWorkerMLCEngine, question: string, 
       120
     )
     stop()
-    const pos = out.match(/Position:\s*(.+)/i)?.[1]?.trim() || members[0].text
-    const lim = out.match(/Limits:\s*(.+)/i)?.[1]?.trim() || ''
+    const modelPos = (out.match(/Position:\s*(.+)/i)?.[1] ?? '').trim()
+    const central = members.map((m, mi) => ({ m, score: groups[g].reduce((sum, idx) => sum + dot(cv[groups[g][mi]], cv[idx] as Float32Array), 0) })).sort((x, y) => y.score - x.score)[0].m
+    const pos = modelPos && grounded(modelPos, members.map((m) => m.text)) ? modelPos : central.text
+    const limRaw = (out.match(/Limits:\s*(.+)/i)?.[1] ?? '').trim()
+    const lim = limRaw && grounded(limRaw, members.map((m) => m.text)) ? limRaw : ''
     const docs = new Set(members.map((m) => m.doc_id))
     const ids = new Set(groups[g].map((i) => claims[i].id))
     const contradicted = edges.some((e) => e.label === 'contradicts' && (ids.has(e.source) !== ids.has(e.target)))
     const tier = contradicted ? (docs.size >= 2 ? 'medium' : 'low') : docs.size >= 3 ? 'high' : docs.size === 2 ? 'medium' : 'low'
     views.push({
       position: pos.replace(/^["“]|["”]$/g, ''),
-      summary: members.map((m) => m.text).join(' '),
+      summary: members.map((m) => m.text).join(' ').slice(0, 520),
       weaknesses: /^none/i.test(lim) ? '' : lim,
       sources: [...new Set(members.map((m) => m.chunk_id))],
       disagreement_causes: [...new Set(edges.filter((e) => e.label === 'contradicts' && e.cda7 && (ids.has(e.source) || ids.has(e.target))).map((e) => e.cda7 as string))],

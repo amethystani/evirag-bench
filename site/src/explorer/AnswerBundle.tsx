@@ -11,16 +11,27 @@ const tierPct = (t: string) => (t === 'high' ? 90 : t === 'medium' ? 55 : 25)
 const TIER_WORDS: Record<string, string> = { high: 'Well supported', medium: 'Partly supported', low: 'Thinly supported' }
 const cite = (run: RunData, source: string) => {
   const c = run.chunks.find((x) => x.id === source)
-  return c ? `${c.authors ? c.authors + ', ' : ''}${c.year}` : docOf(source)
+  if (!c) return docOf(source)
+  const first = (c.authors ?? '').split(',')[0].trim().split(' ').slice(-1)[0]
+  return first ? `${first}${(c.authors ?? '').includes(',') || (c.authors ?? '').includes('et al') ? ' et al.' : ''}, ${c.year}` : `${c.year}`
 }
 
 function answerText(run: RunData) {
-  const lines = [`Q: ${run.question}`, '', run.views.length > 1 ? `The sources disagree. ${run.views.length} positions:` : 'One position:']
+  const lines = [`Q: ${run.question}`, '', headline(run), '']
   run.views.forEach((v, i) => lines.push(`${i + 1}. ${v.position} (${[...new Set(v.sources.map((s) => cite(run, s)))].join('; ')})`))
   const cause = dominantCause(run)
   if (cause) lines.push('', `Most likely reason they differ: ${CAUSE_PLAIN[cause] ?? cause} (automatic label).`)
   lines.push('', trustLine(run), '', ...runChecks(run).map((c) => `${c.ok ? '[ok]' : '[check]'} ${c.label}`))
   return lines.join('\n')
+}
+
+/** The headline follows the evidence: "disagree" only when a real contradiction was found. */
+function headline(run: RunData) {
+  const direct = tensions(run).some((t) => t.direct > 0)
+  if (run.views.length === 0) return 'No position could be formed from the retrieved sources.'
+  if (direct && run.views.length > 1) return `The sources disagree, so this answer keeps ${run.views.length} positions apart instead of blending them into one.`
+  if (run.views.length > 1) return `These sources report ${run.views.length} different findings. No direct contradiction between them was found.`
+  return 'The retrieved sources broadly point the same way.'
 }
 
 function BottomLine({ run }: { run: RunData }) {
@@ -31,11 +42,7 @@ function BottomLine({ run }: { run: RunData }) {
   return (
     <section className="ab-bottom" aria-label="Bottom line">
       <div className="ab-headrow"><p className="ab-kicker">Bottom line</p><button className="ab-copy" onClick={copy}>{copied ? 'Copied' : 'Copy answer'}</button></div>
-      <p className="ab-lead">
-        {run.views.length > 1
-          ? `The sources do not agree, so this answer keeps ${run.views.length} positions apart instead of blending them into one.`
-          : run.views.length === 1 ? 'The retrieved sources broadly agree on one position.' : 'No position could be formed from the retrieved sources.'}
-      </p>
+      <p className="ab-lead">{headline(run)}</p>
       <ol className="ab-positions">
         {run.views.map((v) => (
           <li key={v.position}>
@@ -48,6 +55,7 @@ function BottomLine({ run }: { run: RunData }) {
         <p className="ab-why"><b>Why they differ.</b> Most likely because {CAUSE_PLAIN[cause] ?? cause}. This label is produced automatically; check it against the passages.</p>
       )}
       <p className="ab-trust">{trustLine(run)}</p>
+      {run.source === 'device' && <p className="ab-scope">Answered from a small bundled set of openly licensed abstracts ({run.chunks.length} used here), so it can miss the key studies on a topic. Treat it as a demonstration of the method, not a literature review.</p>}
     </section>
   )
 }

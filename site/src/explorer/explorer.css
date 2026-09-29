@@ -285,3 +285,39 @@ kbd { font: 500 11px 'Courier Prime', monospace; opacity: .7; border: 1px solid 
 .dev-ready i { width: 8px; height: 8px; border-radius: 50%; background: #7ee2a0; box-shadow: 0 0 8px #7ee2a0; }
 .chat-cancel { margin-left: 12px; padding: 3px 12px; border-radius: 999px; border: 1px solid var(--ex-line); background: transparent; color: inherit; font: 500 12px var(--font-body); cursor: pointer; }
 .chat-cancel:hover { background: rgb(255 255 255 / .12); }
+
+.ab-scope { margin: 10px 0 0; padding: 8px 10px; border-radius: 8px; background: rgb(255 255 255 / .07); font: 400 12px/1.55 'Courier Prime', monospace; opacity: .9; }
+
+/* ---- explorer touch targets ---- */
+.ab-tabs [role='radio'], .ab-tabs button { min-height: 34px; }
+.ab-copy { padding: 8px 14px; }
+.ex-switch button[role='switch'] { min-height: 28px; }
+@media (max-width: 768px) {
+  .ab-tabs [role='radio'], .ab-tabs button { min-height: 42px; }
+  .ab-copy { padding: 10px 16px; }
+  .ab-toggle { padding: 12px 16px; }
+  .ex-hist > button:first-child { padding: 12px 10px; }
+  .ex-hist-x { padding: 8px 14px; opacity: .6; }
+  .ex-nav { padding: 13px 10px; }
+  .chat-chip { padding: 14px 16px; }
+  .chat-send { width: 42px; height: 42px; }
+}
+
+/* ---- phone fixes: nothing may be clipped by the page edge ---- */
+.ex-page { min-width: 0; }
+.ex-page [class*='border-midground'], .ex-page [class*='bg-background'] { max-width: 100%; min-width: 0; }
+.ex-page .ex-stack > *, .ex-page .ex-grid3 > *, .ex-page .ex-split > * { min-width: 0; }
+.ex-page [class*='inline-flex'][class*='border'] { flex-wrap: wrap; max-width: 100%; }
+.ex-toolbar > * { max-width: 100%; }
+.ex-toolbar [role='radiogroup'], .ex-toolbar > div:has([role='radio']) { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+.ex-page [role='tablist'] { max-width: 100%; overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
+.ex-page [role='tablist'] > * { flex: none; }
+.ex-table-wrap, .md-table-wrap { max-width: 100%; }
+.ex-back { display: inline-flex; align-items: center; min-height: 40px; padding: 0 12px; }
+.ex-page [role='radio'] { min-height: 34px; }
+.ex-linkcard { min-height: 48px; }
+@media (max-width: 768px) {
+  .ex-page [role='radio'] { min-height: 40px; }
+  .ex-page button[role='switch'] { min-width: 44px; min-height: 30px; }
+  .ex-page a, .ex-page .ex-link { padding-block: 4px; }
+}
