@@ -43,8 +43,16 @@ const features: HermesLandingContent['features'] = [
     body: 'Each view has a position, evidence summary, weaknesses, disagreement causes, passage IDs and a confidence tier.' }
 ]
 
+const BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
+
 const content: HermesLandingContent = {
   ...base,
+  assets: {
+    ...base.assets,
+    badge: BLANK,
+    nousLogo: BLANK,
+    footerGirl: { poster: BLANK, stackedSrc: '', webmSrc: '' }
+  },
   downloadLabel: 'Download the binary',
   features,
   footer: {

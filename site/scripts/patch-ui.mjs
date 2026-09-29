@@ -13,8 +13,7 @@ const edits = {
   ],
   'components/footer/hermes-footer-chrome.js': [
     ['https://github.com/NousResearch', REPO],
-    ['https://discord.gg/NousResearch', `${REPO}/discussions`],
-    ['icon: DiscordIcon,\n    label: "Discord"', 'icon: GitHubIcon,\n    label: "Discussions"'],
+    [/,\s*\{\s*href: "https:\/\/discord\.gg\/NousResearch",\s*icon: DiscordIcon,\s*label: "Discord"\s*\}/, ''],
     ['{ href: "/terms", label: "Terms" }', `{ href: "${REPO}/blob/main/LICENSE", label: "License" }`],
     ['{ href: "/privacy", label: "Privacy" }', `{ href: "${REPO}/blob/main/SECURITY.md", label: "Security" }`]
   ],
@@ -23,13 +22,13 @@ const edits = {
     ['"Nous Research"', '"Evirag"'],
     ['"Hermes Agent v0.17.0"', '"Evirag Bench v0.1.0"']
   ],
-  'components/badges/nous-girl.js': [['alt = "Nous Research"', 'alt = "Evirag"']]
+  'components/badges/nous-girl.js': [['return /* @__PURE__ */ jsx("img"', 'return null; /* @__PURE__ */ jsx("img"']]
 }
 
 for (const [file, pairs] of Object.entries(edits)) {
   const path = ui + file
   if (!existsSync(path)) continue
   let src = readFileSync(path, 'utf8')
-  for (const [from, to] of pairs) src = src.split(from).join(to)
+  for (const [from, to] of pairs) src = typeof from === 'string' ? src.split(from).join(to) : src.replace(from, to)
   writeFileSync(path, src)
 }
