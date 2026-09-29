@@ -164,3 +164,23 @@ kbd { font: 500 11px 'Courier Prime', monospace; opacity: .7; border: 1px solid 
 .chat-send:not(:disabled):hover { transform: scale(1.06); }
 .chat-foot { max-width: 46rem; margin: 10px auto 0; text-align: center; font: 400 11.5px 'Courier Prime', monospace; opacity: .75; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
 @media (max-width: 760px) { .chat { min-height: calc(100dvh - 54px); } .chat-bubble-user { max-width: 92%; } }
+
+/* ---- simplified chrome ---- */
+.ex-top { padding: 10px clamp(12px, 2vw, 22px); background: transparent; border-bottom: 0; gap: 10px; min-height: 52px; }
+.ex-iconbtn { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 10px; border: 0; background: transparent; color: var(--ex-ink); cursor: pointer; transition: background .2s; }
+.ex-iconbtn:hover { background: rgb(255 255 255 / .14); }
+.ex-model { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; background: rgb(255 255 255 / .1); font: 500 15px var(--font-body); letter-spacing: .02em; }
+.ex-model i { font: 500 10px 'Courier Prime', monospace; font-style: normal; letter-spacing: .12em; text-transform: uppercase; opacity: .7; border: 1px solid currentColor; border-radius: 999px; padding: 1px 8px; }
+.ex-back { font: 500 13px var(--font-body); text-decoration: none; opacity: .8; padding: 6px 10px; border-radius: 8px; }
+.ex-back:hover { background: rgb(255 255 255 / .12); opacity: 1; }
+.ex-brand { border-bottom: 0; padding-bottom: 6px; }
+.ex-filter { width: 100%; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--ex-line); background: rgb(0 0 0 / .14); color: inherit; font: 400 13px var(--font-body); outline: 0; }
+.ex-filter::placeholder { color: rgb(255 255 255 / .5); }
+.ex-history { flex: 1; min-height: 0; max-height: none; overflow-y: auto; display: grid; align-content: start; gap: 2px; }
+.ex-hist-empty { margin: 8px; font: 400 12px 'Courier Prime', monospace; opacity: .6; }
+.ex-side-foot { margin-top: auto; }
+.ex-linkgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.ex-linkcard { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid var(--ex-page-line); border-radius: 10px; background: transparent; color: inherit; font: 500 14px var(--font-body); cursor: pointer; transition: background .2s, transform .2s; text-align: left; }
+.ex-linkcard:hover { background: rgb(0 0 0 / .05); transform: translateY(-1px); }
+.chat { min-height: calc(100dvh - 52px); }
+@media (max-width: 760px) { .chat { min-height: calc(100dvh - 52px); } .ex-model { font-size: 14px; } }
