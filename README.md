@@ -10,7 +10,6 @@
 </p>
 
 <p align="center">
-  <a href="https://amethystani.github.io/evirag-bench/">Demo</a> ·
   <a href="paper/paper.pdf">Paper</a> ·
   <a href="CITATION.cff">Cite</a> ·
   <a href="CHANGELOG.md">Changelog</a> ·
@@ -133,7 +132,7 @@ For a quick sanity check of the core mechanism, `scripts/preliminary_check.sh` r
 
 ---
 
-<sub>Banner artwork: Nicholas Roerich and Toshio Ebine, among others. All rights remain with their creators.</sub>
+<sub>Banner artwork: Nicholas Roerich, Toshio Ebine and @khvostart, among others. All rights remain with their creators.</sub>
 
 ## Citation
 
