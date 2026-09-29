@@ -15,7 +15,8 @@ import {
   HermesLandingScroll,
   HermesLandingShell,
   HermesLandingShowcase,
-  PricingTiers
+  PricingTiers,
+  Scramble
 } from '@nous-research/ui'
 import type { HermesLandingContent, HermesLandingDownloads, HermesPricingContent } from '@nous-research/ui'
 import { AppleIcon } from '@nous-research/ui/ui/components/icons/apple'
@@ -25,7 +26,7 @@ import { LoginIcon } from '@nous-research/ui/ui/components/icons/login'
 import { TerminalIcon } from '@nous-research/ui/ui/components/icons/terminal'
 import { UbuntuIcon } from '@nous-research/ui/ui/components/icons/ubuntu'
 import { WindowsIcon } from '@nous-research/ui/ui/components/icons/windows'
-import { StrictMode } from 'react'
+import { StrictMode, useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import './fonts'
 import './styles.css'
@@ -145,21 +146,90 @@ function SiteFooter() {
   return (
     <footer className="bg-white px-[var(--hw-gutter)] py-[calc(90*var(--u))] text-[var(--hw-bg)]">
       <div className="grid grid-cols-2 gap-[calc(60*var(--u))] md:grid-cols-4">
-        {footerColumns.map(([title, links]) => (
-          <div key={title} className="flex flex-col gap-[calc(20*var(--u))]">
-            <h3 className="text-[calc(48*var(--u))] leading-none font-light tracking-[0.03em] uppercase max-md:text-3xl">{title}</h3>
+        {footerColumns.map(([title, links], i) => (
+          <Reveal key={title} delay={i * 100} className="flex flex-col gap-[calc(20*var(--u))]">
+            <h3 className="text-[calc(48*var(--u))] leading-none font-light tracking-[0.03em] uppercase max-md:text-3xl"><Scramble>{title}</Scramble></h3>
             <ul className="hw-mono flex flex-col gap-[calc(10*var(--u))] text-[var(--hw-text-body)] uppercase max-md:text-xs">
               {links.map(([label, href]) => (
                 <li key={label}><a href={href} rel="noopener noreferrer" target="_blank">{label}</a></li>
               ))}
             </ul>
-          </div>
+          </Reveal>
         ))}
       </div>
       <p className="hw-mono mt-[calc(90*var(--u))] text-[var(--hw-text-body)] uppercase max-md:text-xs">
         Evirag Bench &bull; MIT License &bull; 2026
       </p>
     </footer>
+  )
+}
+
+function useInView<T extends HTMLElement>(threshold = 0.2) {
+  const ref = useRef<T>(null)
+  const [seen, setSeen] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setSeen(true)
+        io.disconnect()
+      }
+    }, { threshold })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [threshold])
+  return [ref, seen] as const
+}
+
+function Reveal({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) {
+  const [ref, seen] = useInView<HTMLDivElement>(0.12)
+  return (
+    <div ref={ref} className={`reveal ${seen ? 'reveal-in' : ''} ${className}`} style={{ transitionDelay: `${delay}ms` }}>
+      {children}
+    </div>
+  )
+}
+
+function CountUp({ to, suffix = '' }: { to: number; suffix?: string }) {
+  const [ref, seen] = useInView<HTMLSpanElement>(0.5)
+  const [n, setN] = useState(0)
+  useEffect(() => {
+    if (!seen) return
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { setN(to); return }
+    const start = performance.now()
+    const dur = 1400
+    let raf = 0
+    const tick = (t: number) => {
+      const k = Math.min(1, (t - start) / dur)
+      setN(Math.round(to * (1 - Math.pow(1 - k, 3))))
+      if (k < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [seen, to])
+  return <span ref={ref}>{n.toLocaleString('en-US')}{suffix}</span>
+}
+
+const stats: [number, string, string][] = [
+  [1250, '', 'Gold queries'],
+  [5, '', 'Domains'],
+  [7, '', 'Disagreement causes'],
+  [4, '', 'Retrieval roles']
+]
+
+function Stats() {
+  return (
+    <section className="px-[var(--hw-gutter)] pt-[calc(80*var(--u))] pb-[calc(40*var(--u))]">
+      <div className="grid grid-cols-2 gap-[calc(40*var(--u))] md:grid-cols-4">
+        {stats.map(([n, suffix, label], i) => (
+          <Reveal key={label} delay={i * 90}>
+            <div className="text-[calc(150*var(--u))] leading-none font-light tracking-[0.02em] max-md:text-6xl"><CountUp to={n} suffix={suffix} /></div>
+            <p className="hw-mono mt-[calc(16*var(--u))] text-[var(--hw-text-body)] uppercase max-md:text-xs">{label}</p>
+          </Reveal>
+        ))}
+      </div>
+    </section>
   )
 }
 
@@ -213,31 +283,38 @@ function App() {
       />
       <HermesLandingHero content={content} downloads={heroDownloads} />
       <HermesLandingShowcase content={content} />
+      <Stats />
       <Section>
+        <Reveal>
         <h2 className="text-[calc(72*var(--u))] leading-none font-light tracking-[0.03em]">
-          Ways To Run It
+          <Scramble>Ways To Run It</Scramble>
         </h2>
         <p className="hw-mono mt-[calc(24*var(--u))] text-[var(--hw-text-body)] opacity-90">
           A prebuilt binary, the source code, or a local build with Ollama.
         </p>
+        </Reveal>
       </Section>
       <HermesLandingPlatforms content={content} downloads={downloads} />
       <HermesLandingFeatures content={content} />
       <section className="bg-white px-[var(--hw-gutter)] py-[calc(120*var(--u))] text-[var(--hw-bg)]">
-        <div className="mb-[calc(48*var(--u))] flex items-end justify-between">
+        <Reveal className="mb-[calc(48*var(--u))]">
+        <div className="flex items-end justify-between">
           <h2 className="text-[calc(72*var(--u))] leading-none font-light tracking-[0.03em]">FAQs</h2>
           <Button hierarchy="outline" href={`${REPO}/tree/main/docs`} scale="marketing" surface="white" target="_blank">View docs</Button>
         </div>
+        </Reveal>
         <Accordion collapsible type="single">
-          {faqs.map(([q, a]) => (
-            <AccordionItem key={q} surface="white" value={q}>
+          {faqs.map(([q, a], i) => (
+            <Reveal key={q} delay={i * 70}>
+            <AccordionItem surface="white" value={q}>
               <AccordionTrigger>{q}</AccordionTrigger>
               <AccordionContent>{a}</AccordionContent>
             </AccordionItem>
+            </Reveal>
           ))}
         </Accordion>
       </section>
-      <div id="runs"><PricingTiers content={pricing} /></div>
+      <div id="runs" className="runs-in"><PricingTiers content={pricing} /></div>
       <HermesLandingPortalFooter content={content} version="Evirag Bench v0.1.0" />
       <SiteFooter />
     </HermesLandingShell>
