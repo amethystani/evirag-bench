@@ -26,7 +26,20 @@ import { LoginIcon } from '@nous-research/ui/ui/components/icons/login'
 import { TerminalIcon } from '@nous-research/ui/ui/components/icons/terminal'
 import { UbuntuIcon } from '@nous-research/ui/ui/components/icons/ubuntu'
 import { WindowsIcon } from '@nous-research/ui/ui/components/icons/windows'
-import { StrictMode, useEffect, useRef, useState } from 'react'
+import { StrictMode } from 'react'
+import { CountUp, Reveal } from './hooks'
+import { Problem } from './sections/Problem'
+import { Example } from './sections/Example'
+import { Pipeline } from './sections/Pipeline'
+import { Agents } from './sections/Agents'
+import { Cda7 } from './sections/Cda7'
+import { Graph } from './sections/Graph'
+import { Typology } from './sections/Typology'
+import { Bench } from './sections/Bench'
+import { Metrics } from './sections/Metrics'
+import { Results } from './sections/Results'
+import { Output } from './sections/Output'
+import { Glossary } from './sections/Glossary'
 import { createRoot } from 'react-dom/client'
 import './fonts'
 import './styles.css'
@@ -164,53 +177,6 @@ function SiteFooter() {
   )
 }
 
-function useInView<T extends HTMLElement>(threshold = 0.2) {
-  const ref = useRef<T>(null)
-  const [seen, setSeen] = useState(false)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const io = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setSeen(true)
-        io.disconnect()
-      }
-    }, { threshold })
-    io.observe(el)
-    return () => io.disconnect()
-  }, [threshold])
-  return [ref, seen] as const
-}
-
-function Reveal({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) {
-  const [ref, seen] = useInView<HTMLDivElement>(0.12)
-  return (
-    <div ref={ref} className={`reveal ${seen ? 'reveal-in' : ''} ${className}`} style={{ transitionDelay: `${delay}ms` }}>
-      {children}
-    </div>
-  )
-}
-
-function CountUp({ to, suffix = '' }: { to: number; suffix?: string }) {
-  const [ref, seen] = useInView<HTMLSpanElement>(0.5)
-  const [n, setN] = useState(0)
-  useEffect(() => {
-    if (!seen) return
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { setN(to); return }
-    const start = performance.now()
-    const dur = 1400
-    let raf = 0
-    const tick = (t: number) => {
-      const k = Math.min(1, (t - start) / dur)
-      setN(Math.round(to * (1 - Math.pow(1 - k, 3))))
-      if (k < 1) raf = requestAnimationFrame(tick)
-    }
-    raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf)
-  }, [seen, to])
-  return <span ref={ref}>{n.toLocaleString('en-US')}{suffix}</span>
-}
-
 const stats: [number, string, string][] = [
   [1250, '', 'Gold queries'],
   [5, '', 'Domains'],
@@ -256,6 +222,7 @@ function App() {
                 { href: '#install', icon: <UbuntuIcon aria-hidden className="size-6" />, label: 'Run locally' }
               ]
             },
+            { type: 'link', label: 'Learn', href: '#problem' },
             { type: 'link', label: 'Runs', href: '#runs' },
             { type: 'link', label: 'Demo', href: 'demo/' }
           ],
@@ -284,6 +251,18 @@ function App() {
       <HermesLandingHero content={content} downloads={heroDownloads} />
       <HermesLandingShowcase content={content} />
       <Stats />
+      <Problem />
+      <Example />
+      <Pipeline />
+      <Agents />
+      <Cda7 />
+      <Graph />
+      <Typology />
+      <Bench />
+      <Metrics />
+      <Results />
+      <Output />
+      <Glossary />
       <Section>
         <Reveal>
         <h2 className="text-[calc(72*var(--u))] leading-none font-light tracking-[0.03em]">
