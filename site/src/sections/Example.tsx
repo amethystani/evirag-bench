@@ -1,12 +1,15 @@
+import { Badge, BadgeGroup, Segmented, Switch } from '@nous-research/ui'
 import { useState } from 'react'
 import run from '../smoke_run.json'
-import { Chapter, Note, Tag } from './parts'
+import { Chapter, Note } from './parts'
 
 type View = { position: string; summary: string; weaknesses: string; sources: string[]; disagreement_causes: string[]; confidence_tier: string }
 
 export function Example() {
   const [mode, setMode] = useState<'vanilla' | 'evirag'>('evirag')
   const views = run.views as View[]
+  const [showWeak, setShowWeak] = useState(true)
+  const [showMeta, setShowMeta] = useState(true)
   return (
     <Chapter
       id="example"
@@ -16,12 +19,14 @@ export function Example() {
       paper
     >
       <div className="q-bar">{run.question}</div>
-      <div className="mt-6 flex gap-3">
-        {(['vanilla', 'evirag'] as const).map((m) => (
-          <button key={m} onClick={() => setMode(m)} className={`seg ${mode === m ? 'seg-on' : ''}`}>
-            {m === 'vanilla' ? 'Vanilla RAG' : 'EVIRAG'}
-          </button>
-        ))}
+      <div className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-4">
+        <Segmented aria-label="Answer style" value={mode} onChange={setMode} options={[{ label: 'Vanilla RAG', value: 'vanilla' }, { label: 'EVIRAG', value: 'evirag' }]} />
+        {mode === 'evirag' && (
+          <>
+            <label className="hw-mono flex items-center gap-3 text-xs uppercase"><Switch checked={showWeak} onCheckedChange={setShowWeak} aria-label="Show weaknesses" /> Weaknesses</label>
+            <label className="hw-mono flex items-center gap-3 text-xs uppercase"><Switch checked={showMeta} onCheckedChange={setShowMeta} aria-label="Show sources and causes" /> Sources and causes</label>
+          </>
+        )}
       </div>
 
       <div className="mt-8 min-h-[22rem]">
@@ -37,11 +42,15 @@ export function Example() {
                 <p className="panel-label">View {i + 1}</p>
                 <h3 className="text-[calc(46*var(--u))] leading-[1.05] font-light max-md:text-2xl">{v.position}</h3>
                 <p className="hw-mono mt-3 text-[calc(20*var(--u))] leading-[1.6] normal-case max-md:text-xs">{v.summary}</p>
-                <p className="hw-mono mt-3 text-[calc(20*var(--u))] leading-[1.6] normal-case opacity-70 max-md:text-xs"><b>Weaknesses.</b> {v.weaknesses}</p>
+                {showWeak && <p className="hw-mono mt-3 text-[calc(20*var(--u))] leading-[1.6] normal-case opacity-70 max-md:text-xs"><b>Weaknesses.</b> {v.weaknesses}</p>}
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <Tag tone={`conf-${v.confidence_tier}`}>{v.confidence_tier} confidence</Tag>
-                  {v.disagreement_causes.map((c) => <Tag key={c}>{c}</Tag>)}
-                  {v.sources.map((s) => <Tag key={s} tone="src">{s}</Tag>)}
+                  <Badge type={v.confidence_tier === 'low' ? 'primary' : 'outline'} surface="white">{v.confidence_tier} confidence</Badge>
+                  {showMeta && (
+                    <BadgeGroup surface="white" type="outline">
+                      {v.disagreement_causes.map((c) => <BadgeGroup.Item key={c}>{c}</BadgeGroup.Item>)}
+                      {v.sources.map((x) => <BadgeGroup.Item key={x}>{x}</BadgeGroup.Item>)}
+                    </BadgeGroup>
+                  )}
                 </div>
               </article>
             ))}

@@ -1,3 +1,4 @@
+import { MultiSelect, MultiSelectOption } from '@nous-research/ui'
 import { useState } from 'react'
 import { Reveal } from '../hooks'
 import { Chapter, Note } from './parts'
@@ -14,6 +15,8 @@ const CAUSES = [
 
 export function Cda7() {
   const [open, setOpen] = useState(0)
+  const [show, setShow] = useState<string[]>(CAUSES.map((c) => c[0]))
+  const list = CAUSES.filter((c) => show.includes(c[0]))
   return (
     <Chapter
       id="cda7"
@@ -22,11 +25,16 @@ export function Cda7() {
       lead="Standard checks stop at labelling two claims as contradictory. CDA-7 goes one step further and records why. A methodological split, a population split and a failed replication call for very different readings."
       paper
     >
+      <div className="mb-6 max-w-md">
+        <MultiSelect aria-label="Show causes" surface="white" value={show} onValueChange={setShow} placeholder="Filter causes">
+          {CAUSES.map((c) => <MultiSelectOption key={c[0]} value={c[0]}>{c[0]}</MultiSelectOption>)}
+        </MultiSelect>
+      </div>
       <div className="grid gap-3">
-        {CAUSES.map(([name, meaning, ex], i) => (
+        {list.map(([name, meaning, ex], i) => (
           <Reveal key={name} delay={i * 60}>
             <button className={`cda ${open === i ? 'cda-on' : ''}`} onClick={() => setOpen(open === i ? -1 : i)} aria-expanded={open === i}>
-              <span className="hw-mono text-xs opacity-60">{String(i + 1).padStart(2, '0')}</span>
+              <span className="hw-mono text-xs opacity-60">{String(CAUSES.findIndex((c) => c[0] === name) + 1).padStart(2, '0')}</span>
               <span className="text-[calc(58*var(--u))] leading-none font-light uppercase max-md:text-2xl">{name}</span>
               <span className="cda-plus" aria-hidden>+</span>
               <span className="cda-body">

@@ -1,3 +1,4 @@
+import { BarChart } from '@nous-research/ui/ui/components/graphs/index'
 import { Reveal, useInView } from '../hooks'
 import { Chapter, Note } from './parts'
 import { Radar } from '../retro/Radar'
@@ -43,7 +44,21 @@ export function Results() {
         {ROWS.map(([l, vc, cr, calls, c], i) => <Row key={l} label={l} vc={vc} cr={cr} calls={calls} color={c} i={i} />)}
       </div>
 
-      <div className="mt-[calc(70*var(--u))] max-md:mt-10"><Radar /></div>
+      <div className="mt-[calc(70*var(--u))] grid gap-5 md:grid-cols-2 max-md:mt-10">
+        <Radar />
+        <div className="panel">
+          <p className="panel-label">Contradiction recall by system</p>
+          <BarChart
+            height={300}
+            data={ROWS.map(([label, , cr]) => ({ label: label.replace('EVIRAG ', '').replace('Vanilla RAG, ', 'Vanilla ').replace('One structured prompt, 15 passages', 'Prompt, 15').replace('Closed-book, no retrieval', 'Closed-book'), cr }))}
+            x="label"
+            y="cr"
+            yDomain={[0, 1]}
+            formatY={(v) => v.toFixed(1)}
+            formatTooltip={(d) => `${String(d.label)}: ${Number(d.cr).toFixed(3)}`}
+          />
+        </div>
+      </div>
 
       <div className="mt-[calc(90*var(--u))] grid gap-5 md:grid-cols-3 max-md:mt-10">
         {[

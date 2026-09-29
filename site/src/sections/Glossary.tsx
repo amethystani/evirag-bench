@@ -1,3 +1,5 @@
+import { Input, Separator } from '@nous-research/ui'
+import { useState } from 'react'
 import { Reveal } from '../hooks'
 import { Chapter } from './parts'
 
@@ -15,10 +17,15 @@ const G = [
 ]
 
 export function Glossary() {
+  const [q, setQ] = useState('')
+  const list = G.filter(([t, d]) => (t + ' ' + d).toLowerCase().includes(q.trim().toLowerCase()))
   return (
     <Chapter id="glossary" no="XII. Glossary" title="Terms in plain words">
-      <div className="grid gap-x-[calc(80*var(--u))] gap-y-6 md:grid-cols-2">
-        {G.map(([t, d], i) => (
+      <div className="mb-8 max-w-md">
+        <Input aria-label="Search the glossary" placeholder="Search terms" value={q} onChange={(e) => setQ(e.target.value)} surface="blue" />
+      </div>
+      <div className="grid gap-x-[calc(80*var(--u))] gap-y-2 md:grid-cols-2">
+        {list.map(([t, d], i) => (
           <Reveal key={t} delay={(i % 2) * 90}>
             <div className="gloss">
               <h3 className="text-[calc(46*var(--u))] leading-none font-light uppercase max-md:text-2xl">{t}</h3>
@@ -26,7 +33,9 @@ export function Glossary() {
             </div>
           </Reveal>
         ))}
+        {list.length === 0 && <p className="hw-mono normal-case opacity-70">No term matches "{q}".</p>}
       </div>
+      <Separator className="mt-10 opacity-30" />
     </Chapter>
   )
 }

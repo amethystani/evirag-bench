@@ -1,3 +1,4 @@
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@nous-research/ui'
 import { Reveal } from '../hooks'
 import { Chapter, Note } from './parts'
 
@@ -19,17 +20,21 @@ export function Agents() {
       <div className="grid gap-5 md:grid-cols-4">
         {AGENTS.map((a, i) => (
           <Reveal key={a.name} delay={i * 110}>
-            <div className="panel h-full">
-              <p className="panel-label">Agent {i + 1}</p>
-              <h3 className="text-[calc(68*var(--u))] leading-none font-light uppercase max-md:text-3xl">{a.name}</h3>
-              <div className="pips mt-5" aria-label={`${a.n} passages`}>
-                {Array.from({ length: a.n }).map((_, k) => (
-                  <i key={k} style={{ background: a.tone, animationDelay: `${0.4 + k * 0.12}s` }} />
-                ))}
-              </div>
-              <p className="hw-mono mt-2 text-xs uppercase opacity-70">{a.n} passages</p>
-              <p className="hw-mono mt-4 text-[calc(21*var(--u))] leading-[1.6] normal-case max-md:text-xs">{a.goal}</p>
-            </div>
+            <Card className="h-full">
+              <CardHeader>
+                <p className="panel-label">Agent {i + 1}</p>
+                <CardTitle className="text-[calc(68*var(--u))] max-md:text-3xl">{a.name}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="pips" aria-label={`${a.n} passages`}>
+                  {Array.from({ length: a.n }).map((_, k) => (
+                    <i key={k} style={{ background: a.tone, animationDelay: `${0.4 + k * 0.12}s` }} />
+                  ))}
+                </div>
+                <p className="hw-mono mt-2 text-xs uppercase opacity-70">{a.n} passages</p>
+                <CardDescription className="mt-4">{a.goal}</CardDescription>
+              </CardContent>
+            </Card>
           </Reveal>
         ))}
       </div>

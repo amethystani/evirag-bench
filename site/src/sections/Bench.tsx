@@ -1,13 +1,17 @@
+import { Progress, Stats } from '@nous-research/ui'
 import { CountUp, Reveal, useInView } from '../hooks'
+import { useEffect, useState } from 'react'
 import { Chapter, Note } from './parts'
 
-function Bar({ label, value, max, color = '#fff', suffix = '', delay = 0 }: { label: string; value: number; max: number; color?: string; suffix?: string; delay?: number }) {
+function Bar({ label, value, max, delay = 0 }: { label: string; value: number; max: number; color?: string; suffix?: string; delay?: number }) {
   const [ref, seen] = useInView<HTMLDivElement>(0.4)
+  const [go, setGo] = useState(false)
+  useEffect(() => { if (!seen) return; const id = setTimeout(() => setGo(true), delay); return () => clearTimeout(id) }, [seen, delay])
   return (
-    <div ref={ref} className="bar-row">
+    <div ref={ref} className="bar-row2">
       <span className="hw-mono text-[calc(21*var(--u))] uppercase max-md:text-xs">{label}</span>
-      <span className="bar-track"><i style={{ width: seen ? `${(value / max) * 100}%` : '0%', background: color, transitionDelay: `${delay}ms` }} /></span>
-      <span className="hw-mono text-[calc(21*var(--u))] max-md:text-xs">{value.toLocaleString('en-US')}{suffix}</span>
+      <Progress aria-label={label} value={go ? Math.round((value / max) * 100) : 0} />
+      <span className="hw-mono text-[calc(21*var(--u))] max-md:text-xs">{value.toLocaleString('en-US')}</span>
     </div>
   )
 }
@@ -29,6 +33,10 @@ export function Bench() {
             <p className="hw-mono mt-3 text-[calc(20*var(--u))] uppercase max-md:text-xs">{l}</p>
           </Reveal>
         ))}
+      </div>
+
+      <div className="mt-[calc(90*var(--u))] max-md:mt-10">
+        <Stats items={[{ label: 'Viewpoints per query', value: '2 to 4' }, { label: 'Contradiction pairs per query', value: '1 to 8' }, { label: 'Annotators per domain', value: 'Authors + 1 external' }, { label: 'Viewpoint agreement (κ)', value: '0.71' }]} />
       </div>
 
       <div className="mt-[calc(110*var(--u))] grid gap-[calc(70*var(--u))] md:grid-cols-2 max-md:mt-12 max-md:gap-10">

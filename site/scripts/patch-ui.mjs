@@ -33,6 +33,7 @@ const edits = {
     ['children: "Windows"', 'children: "Git"']
   ],
   'hermes-landing/sections/landing-features.js': [['{ children: "Preview" }', '{ children: "Overview" }']],
+  'components/poster/index.js': [['children: "Hermes Agent"', 'children: "Evirag"']],
   'components/badges/nous-girl.js': [['return /* @__PURE__ */ jsx("img"', 'return null; /* @__PURE__ */ jsx("img"']]
 }
 

@@ -16,6 +16,7 @@ import {
   HermesLandingShell,
   HermesLandingShowcase,
   PricingTiers,
+  Notification,
   Scramble
 } from '@nous-research/ui'
 import type { HermesLandingContent, HermesLandingDownloads, HermesPricingContent } from '@nous-research/ui'
@@ -26,7 +27,7 @@ import { LoginIcon } from '@nous-research/ui/ui/components/icons/login'
 import { TerminalIcon } from '@nous-research/ui/ui/components/icons/terminal'
 import { UbuntuIcon } from '@nous-research/ui/ui/components/icons/ubuntu'
 import { WindowsIcon } from '@nous-research/ui/ui/components/icons/windows'
-import { StrictMode } from 'react'
+import { StrictMode, useState } from 'react'
 import { CountUp, Reveal } from './hooks'
 import { Problem } from './sections/Problem'
 import { Example } from './sections/Example'
@@ -40,6 +41,9 @@ import { Metrics } from './sections/Metrics'
 import { Results } from './sections/Results'
 import { Output } from './sections/Output'
 import { Glossary } from './sections/Glossary'
+import { Explore } from './sections/Explore'
+import { Quickstart } from './sections/Quickstart'
+import { Finale } from './sections/Finale'
 import { Overlay } from './retro/Overlay'
 import { Statement } from './retro/Statement'
 import { enableTilt } from './retro/tilt'
@@ -209,6 +213,7 @@ function Section({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
+  const [banner, setBanner] = useState(true)
   return (
     <HermesLandingShell>
       <HermesLandingScroll />
@@ -254,6 +259,13 @@ function App() {
           ]
         } as never}
       />
+      {banner && (
+        <div className="banner">
+          <Notification onDismiss={() => setBanner(false)} dismissLabel="Dismiss">
+            The paper, Beyond Epistemic Collapse, is in the repository. <a href={`${REPO}/blob/main/paper/paper.pdf`} target="_blank" rel="noopener noreferrer">Read it</a>
+          </Notification>
+        </div>
+      )}
       <HermesLandingHero content={content} downloads={heroDownloads} />
       <HermesLandingShowcase content={content} />
       <Stats />
@@ -266,6 +278,7 @@ function App() {
       <Cda7 />
       <Graph />
       <Typology />
+      <Explore />
       <Timeline />
       <Statement text="A benchmark should reward the spread of evidence, not the smoothest sentence." accent={['spread','evidence,']} sub="That is what EVIRAG-Bench measures." />
       <Bench />
@@ -273,6 +286,7 @@ function App() {
       <Results />
       <Output />
       <Glossary />
+      <Quickstart />
       <Section>
         <Reveal>
         <h2 className="text-[calc(72*var(--u))] leading-none font-light tracking-[0.03em]">
@@ -304,6 +318,7 @@ function App() {
         </Accordion>
       </section>
       <div id="runs" className="runs-in"><PricingTiers content={pricing} /></div>
+      <Finale />
       <HermesLandingPortalFooter content={content} version="Evirag Bench v0.1.0" />
       <SiteFooter />
     </HermesLandingShell>
