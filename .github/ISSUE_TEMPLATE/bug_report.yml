@@ -1,0 +1,31 @@
+name: Bug report
+description: Something does not work as documented.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you ran, what you expected, and what you saw.
+    validations: {required: true}
+  - type: textarea
+    id: command
+    attributes:
+      label: Command
+      render: sh
+    validations: {required: true}
+  - type: input
+    id: model
+    attributes:
+      label: Chat and embedding models
+      placeholder: qwen2.5:0.5b, all-minilm
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      placeholder: macOS 15, Rust 1.96, Ollama 0.x
+  - type: textarea
+    id: logs
+    attributes:
+      label: Output or logs
+      render: text

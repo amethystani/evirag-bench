@@ -1,0 +1,22 @@
+name: Paper
+
+on:
+  push:
+    branches: [main]
+    paths: ['paper/**', '.github/workflows/paper.yml']
+  pull_request:
+    paths: ['paper/**']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: wtfjoke/setup-tectonic@v3
+      - name: Compile
+        working-directory: paper
+        run: tectonic -X compile acl_latex.tex --keep-logs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paper
+          path: paper/acl_latex.pdf

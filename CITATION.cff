@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use this software or benchmark, please cite the paper."
+title: "EVIRAG: Disagreement-Aware Scientific Retrieval-Augmented Generation"
+type: software
+license: MIT
+repository-code: "https://github.com/amethystani/evirag-bench"
+authors:
+  - family-names: Mishra
+    given-names: Animesh
+    affiliation: "Indian Institute of Technology Patna"
+  - family-names: Sharma
+    given-names: Krishang
+    affiliation: "Shiv Nadar Institution of Eminence"
+  - family-names: Khetarpaul
+    given-names: Sonia
+    affiliation: "Shiv Nadar Institution of Eminence"
+keywords:
+  - retrieval-augmented generation
+  - scientific question answering
+  - disagreement
+  - contradiction detection
+preferred-citation:
+  type: article
+  title: "Beyond Epistemic Collapse: Disagreement-Aware Scientific Retrieval-Augmented Generation"
+  authors:
+    - family-names: Mishra
+      given-names: Animesh
+    - family-names: Sharma
+      given-names: Krishang
+    - family-names: Khetarpaul
+      given-names: Sonia
+  year: 2026
+  journal: "Proceedings of EMNLP 2026"

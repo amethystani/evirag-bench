@@ -1,0 +1,19 @@
+name: New baseline or model
+description: Propose a system or model to compare against.
+labels: [baseline, enhancement]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: System or model
+    validations: {required: true}
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it belongs in the comparison
+    validations: {required: true}
+  - type: textarea
+    id: how
+    attributes:
+      label: How it would run here
+      description: Ollama model tag, prompt strategy, retrieval settings.

@@ -1,9 +1,20 @@
 <p align="center"><img src="docs/assets/hero.jpg" alt="EVIRAG" width="100%"></p>
 
 <p align="center">
-  <img alt="Rust" src="https://img.shields.io/badge/Rust-2021-b7410e?style=flat-square&logo=rust&logoColor=white">
+  <a href="https://github.com/amethystani/evirag-bench/actions/workflows/rust.yml"><img alt="CI" src="https://github.com/amethystani/evirag-bench/actions/workflows/rust.yml/badge.svg"></a>
+  <a href="https://github.com/amethystani/evirag-bench/releases"><img alt="Release" src="https://img.shields.io/github/v/release/amethystani/evirag-bench?include_prereleases&style=flat-square&color=1f3fbf"></a>
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-6b7fd6?style=flat-square"></a>
+  <img alt="Rust" src="https://img.shields.io/badge/Rust-2024-b7410e?style=flat-square&logo=rust&logoColor=white">
   <img alt="Ollama" src="https://img.shields.io/badge/Ollama-local_models-1f3fbf?style=flat-square">
   <img alt="Benchmark" src="https://img.shields.io/badge/benchmark-1%2C250_queries-6b7fd6?style=flat-square">
+</p>
+
+<p align="center">
+  <a href="https://amethystani.github.io/evirag-bench/">Demo</a> ·
+  <a href="paper/paper.pdf">Paper</a> ·
+  <a href="CITATION.cff">Cite</a> ·
+  <a href="CHANGELOG.md">Changelog</a> ·
+  <a href="CONTRIBUTING.md">Contribute</a>
 </p>
 
 EVIRAG preserves disagreement across scientific retrieval and answer generation. The Rust executable provides the seven-stage pipeline, evaluation metrics, corpus tools, and baseline controls. The paper source and PDF are in `paper/`.
@@ -123,3 +134,16 @@ For a quick sanity check of the core mechanism, `scripts/preliminary_check.sh` r
 ---
 
 <sub>Banner artwork: Nicholas Roerich and Toshio Ebine, among others. All rights remain with their creators.</sub>
+
+## Citation
+
+```bibtex
+@inproceedings{mishra2026evirag,
+  title     = {Beyond Epistemic Collapse: Disagreement-Aware Scientific Retrieval-Augmented Generation},
+  author    = {Mishra, Animesh and Sharma, Krishang and Khetarpaul, Sonia},
+  booktitle = {Proceedings of EMNLP},
+  year      = {2026}
+}
+```
+
+Released under the [MIT License](LICENSE).

@@ -1,0 +1,21 @@
+name: Corpus or annotation contribution
+description: Propose a corpus, domain, or set of gold annotations.
+labels: [annotation, data]
+body:
+  - type: input
+    id: domain
+    attributes:
+      label: Domain
+      placeholder: education, biomedicine, economics, nutrition, earth_sciences, or new
+    validations: {required: true}
+  - type: textarea
+    id: source
+    attributes:
+      label: Source and licence
+      description: Where the documents come from and under what terms they can be shared.
+    validations: {required: true}
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Number of documents or queries, and how gold viewpoints were annotated.

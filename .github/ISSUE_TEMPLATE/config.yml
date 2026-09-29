@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/amethystani/evirag-bench/discussions
+    about: Ask a question or share how you are using EVIRAG.
+  - name: Security report
+    url: https://github.com/amethystani/evirag-bench/security/advisories/new
+    about: Report a vulnerability privately.

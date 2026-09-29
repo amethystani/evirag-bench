@@ -1,0 +1,16 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+categories:
+  - title: Pipeline and metrics
+    labels: [enhancement, baseline]
+  - title: Data
+    labels: [annotation, data]
+  - title: Fixes
+    labels: [bug]
+  - title: Docs and paper
+    labels: [documentation, paper]
+change-template: '- $TITLE (#$NUMBER)'
+template: |
+  ## Changes
+
+  $CHANGES
