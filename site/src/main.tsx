@@ -14,7 +14,6 @@ import {
   HermesLandingPortalFooter,
   HermesLandingScroll,
   HermesLandingShell,
-  HermesLandingShowcase,
   PricingTiers,
   Scramble
 } from '@nous-research/ui'
@@ -44,6 +43,7 @@ import { Explore } from './sections/Explore'
 import { Quickstart } from './sections/Quickstart'
 import { Finale } from './sections/Finale'
 import { Announcement } from './sections/Announcement'
+import { Showcase } from './sections/Showcase'
 import { Overlay } from './retro/Overlay'
 import { Statement } from './retro/Statement'
 import { enableTilt } from './retro/tilt'
@@ -260,7 +260,7 @@ function App() {
         } as never}
       />
       <HermesLandingHero content={content} downloads={heroDownloads} />
-      <HermesLandingShowcase content={content} />
+      <Showcase />
       <Stats />
       <Statement text="Not every question has one answer. Some have three, and they disagree for reasons that matter." accent={['three,','disagree','matter']} sub="So keep the disagreement." />
       <MacTerminal />
