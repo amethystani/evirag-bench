@@ -321,3 +321,7 @@ kbd { font: 500 11px 'Courier Prime', monospace; opacity: .7; border: 1px solid 
   .ex-page button[role='switch'] { min-width: 44px; min-height: 30px; }
   .ex-page a, .ex-page .ex-link { padding-block: 4px; }
 }
+
+.sbars-bar { transform-box: fill-box; transform-origin: bottom; animation: sbar-grow .8s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes sbar-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@media (prefers-reduced-motion: reduce) { .sbars-bar { animation: none; } }

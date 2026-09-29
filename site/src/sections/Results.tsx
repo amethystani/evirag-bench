@@ -1,4 +1,4 @@
-import { BarChart } from '@nous-research/ui/ui/components/graphs/index'
+import { SimpleBars } from '../explorer/SimpleBars'
 import { Reveal, useInView } from '../hooks'
 import { Chapter, Note } from './parts'
 import { Radar } from '../retro/Radar'
@@ -48,14 +48,12 @@ export function Results() {
         <Radar />
         <div className="panel">
           <p className="panel-label">Contradiction recall by system</p>
-          <BarChart
+          <SimpleBars
+            label="Contradiction recall by system"
             height={300}
-            data={ROWS.map(([label, , cr]) => ({ label: label.replace('EVIRAG ', '').replace('Vanilla RAG, ', 'Vanilla ').replace('One structured prompt, 15 passages', 'Prompt, 15').replace('Closed-book, no retrieval', 'Closed-book'), cr }))}
-            x="label"
-            y="cr"
-            yDomain={[0, 1]}
-            formatY={(v) => v.toFixed(1)}
-            formatTooltip={(d) => `${String(d.label)}: ${Number(d.cr).toFixed(3)}`}
+            max={1}
+            format={(v) => v.toFixed(2)}
+            data={ROWS.map(([label, , cr]) => ({ label: label.replace('EVIRAG ', '').replace('Vanilla RAG, ', 'Vanilla ').replace('One structured prompt, 15 passages', 'Prompt, 15').replace('Closed-book, no retrieval', 'Closed-book'), value: cr }))}
           />
         </div>
       </div>

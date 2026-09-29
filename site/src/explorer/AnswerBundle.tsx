@@ -1,5 +1,5 @@
 import { Badge, BadgeGroup, Progress, Segmented } from '@nous-research/ui'
-import { BarChart } from '@nous-research/ui/ui/components/graphs/index'
+import { SimpleBars } from './SimpleBars'
 import { useState } from 'react'
 import type { RunData } from './data'
 import { CAUSE_PLAIN, claimOf, contradictionsOf, dominantCause, looksLikeCaveat, runChecks, tensions, trustLine, unsupportedWords } from './checks'
@@ -181,13 +181,26 @@ function TimeTab({ run }: { run: RunData }) {
     <div className="ab-grid2">
       <div>
         <p className="ab-no">Claims per year</p>
-        <BarChart height={200} data={run.curve.map(([y, v]) => ({ year: y, n: v[0] }))} x="year" y="n" yDomain={[0, top]} formatTooltip={(d) => `${String(d.year)}: ${String(d.n)} claims`} />
+        <SimpleBars label="Claims per year" data={run.curve.map(([y, v]) => ({ label: y, value: v[0] }))} max={top} color="#edff45" />
       </div>
       <div>
         <p className="ab-no">Contradiction links per year</p>
-        <BarChart height={200} data={run.curve.map(([y, v]) => ({ year: y, n: v[1] }))} x="year" y="n" yDomain={[0, top]} formatTooltip={(d) => `${String(d.year)}: ${String(d.n)} links`} />
+        <SimpleBars label="Contradiction links per year" data={run.curve.map(([y, v]) => ({ label: y, value: v[1] }))} max={top} color="#ff6b6b" />
       </div>
     </div>
+  )
+}
+
+export function TabView({ run, tab }: { run: RunData; tab: Exclude<Tab, 'positions'> | 'positions' }) {
+  return (
+    <>
+      {tab === 'positions' && <PositionsTab run={run} />}
+      {tab === 'graph' && <ClaimGraph run={run} />}
+      {tab === 'conflicts' && <ConflictsTab run={run} />}
+      {tab === 'diff' && <DiffTab run={run} />}
+      {tab === 'sources' && <SourcesTab run={run} />}
+      {tab === 'time' && <TimeTab run={run} />}
+    </>
   )
 }
 

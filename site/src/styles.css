@@ -315,3 +315,16 @@ body { margin: 0; background: #0000f2; overflow-x: clip; }
   .show-answer { padding-bottom: 12px; }
   .show-pos li { font-size: 13px; }
 }
+
+/* walkthrough: six tab pills, inner panels */
+.show-tabs { overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
+.show-tabs span { flex: none; white-space: nowrap; }
+.show-panel { animation: show-in .4s ease both; min-width: 0; }
+.show-tabview { padding: 12px 14px 16px; min-width: 0; text-transform: none; letter-spacing: 0; }
+.show-tabview .ab-card { background: rgb(255 255 255 / .06); }
+.show-thread { scroll-behavior: smooth; }
+.show-card .ab-p, .show-card .ab-mini { color: #eef0ff; }
+
+.sbars-bar { transform-box: fill-box; transform-origin: bottom; animation: sbar-grow .8s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes sbar-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@media (prefers-reduced-motion: reduce) { .sbars-bar { animation: none; } }

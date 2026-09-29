@@ -1,5 +1,5 @@
 import { Badge, BadgeGroup, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, ListItem, Progress, Segmented, Select, SelectOption, Separator, Stats, Switch, Tabs, TabsList, TabsPanel, TabsTrigger } from '@nous-research/ui'
-import { BarChart } from '@nous-research/ui/ui/components/graphs/index'
+import { SimpleBars } from './SimpleBars'
 import { useMemo, useState } from 'react'
 import outputDoc from '../../../docs/output.md?raw'
 import cdaDoc from '../../../docs/cda7.md?raw'
@@ -230,11 +230,11 @@ export function Time() {
       <div className="ex-grid2">
         <div>
           <p className="ex-label">Claims per year</p>
-          <BarChart height={260} data={curve.map(([y, v]) => ({ year: y, n: v[0] }))} x="year" y="n" yDomain={[0, 8]} formatTooltip={(d) => `${String(d.year)}: ${String(d.n)} claims`} />
+          <SimpleBars label="Claims per year" height={260} data={curve.map(([y, v]) => ({ label: y, value: v[0] }))} max={8} color="#0000f2" />
         </div>
         <div>
           <p className="ex-label">Contradiction links per year</p>
-          <BarChart height={260} data={curve.map(([y, v]) => ({ year: y, n: v[1] }))} x="year" y="n" yDomain={[0, 8]} formatTooltip={(d) => `${String(d.year)}: ${String(d.n)} links`} />
+          <SimpleBars label="Contradiction links per year" height={260} data={curve.map(([y, v]) => ({ label: y, value: v[1] }))} max={8} color="#e53935" />
         </div>
       </div>
     </>
@@ -247,7 +247,7 @@ export function Metrics() {
     <>
       <PageTitle title="Results" sub="Numbers reported in the paper (35B open model, full benchmark and a 250-query control subset). They are not produced by the smoke run in this repository." />
       <div className="ex-toolbar"><Segmented aria-label="Metric" value={metric} onChange={setMetric} options={[{ label: 'Contradiction recall', value: 'cr' }, { label: 'Viewpoint coverage', value: 'vc' }]} /></div>
-      <BarChart height={320} data={SYSTEMS.map((s) => ({ name: s.name, v: metric === 'cr' ? s.cr : s.vc }))} x="name" y="v" yDomain={[0, 1]} formatY={(v) => v.toFixed(1)} formatTooltip={(d) => `${String(d.name)}: ${Number(d.v).toFixed(3)}`} />
+      <SimpleBars label={metric === 'cr' ? 'Contradiction recall by system' : 'Viewpoint coverage by system'} height={320} data={SYSTEMS.map((s) => ({ label: s.name, value: metric === 'cr' ? s.cr : s.vc }))} max={1} format={(v) => v.toFixed(2)} color="#0000f2" />
       <div className="ex-table-wrap">
         <table className="md-table">
           <thead><tr><th>System</th><th>Coverage</th><th>Contradiction recall</th><th>LLM calls</th></tr></thead>
