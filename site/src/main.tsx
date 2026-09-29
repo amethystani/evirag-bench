@@ -16,7 +16,6 @@ import {
   HermesLandingShell,
   HermesLandingShowcase,
   PricingTiers,
-  Notification,
   Scramble
 } from '@nous-research/ui'
 import type { HermesLandingContent, HermesLandingDownloads, HermesPricingContent } from '@nous-research/ui'
@@ -44,6 +43,7 @@ import { Glossary } from './sections/Glossary'
 import { Explore } from './sections/Explore'
 import { Quickstart } from './sections/Quickstart'
 import { Finale } from './sections/Finale'
+import { Announcement } from './sections/Announcement'
 import { Overlay } from './retro/Overlay'
 import { Statement } from './retro/Statement'
 import { enableTilt } from './retro/tilt'
@@ -213,10 +213,10 @@ function Section({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
-  const [banner, setBanner] = useState(true)
   return (
     <HermesLandingShell>
       <HermesLandingScroll />
+      <Announcement />
       <FilmGrain />
       <Overlay />
       <HermesHeader
@@ -259,13 +259,6 @@ function App() {
           ]
         } as never}
       />
-      {banner && (
-        <div className="banner">
-          <Notification onDismiss={() => setBanner(false)} dismissLabel="Dismiss">
-            The paper, Beyond Epistemic Collapse, is in the repository. <a href={`${REPO}/blob/main/paper/paper.pdf`} target="_blank" rel="noopener noreferrer">Read it</a>
-          </Notification>
-        </div>
-      )}
       <HermesLandingHero content={content} downloads={heroDownloads} />
       <HermesLandingShowcase content={content} />
       <Stats />
